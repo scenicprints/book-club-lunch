@@ -1,7 +1,10 @@
-import { EVENT, connect } from './fb.js?v=7';
-import { unlockBell, ring } from './bell.js?v=7';
-import { CHEESES, EXTRAS, burgerSummary, extrasList, esc } from './menu.js?v=7';
-import { DEFAULTS, LABELS } from './cook.js?v=7';
+import { EVENT, connect } from './fb.js?v=8';
+import { unlockBell, ring } from './bell.js?v=8';
+import { CHEESES, burgerSummary, extrasList, esc } from './menu.js?v=8';
+import { REMINDERS } from './cook.js?v=8';
+
+// One screen, no scrolling: patties to cook along the top, tickets across the
+// middle, heat-and-time reminders along the bottom.
 
 const app = document.getElementById('app');
 const IS_TEST = EVENT !== 'book-club-lunch-2026-09-26';
@@ -10,7 +13,7 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } },
 };
-const KEY = { settings: 'kitchen:settings' };
+const KEY = { reminders: 'kitchen:reminders' };
 
 const K = {
   started: false,
@@ -20,8 +23,8 @@ const K = {
   orders: [],
   seen: new Set(),
   fresh: new Set(), // tickets that just arrived, swung onto the rail
-  settings: { ...DEFAULTS, ...store.get(KEY.settings, {}) },
-  sheet: null,      // 'settings' while the timer lengths are open
+  reminders: store.get(KEY.reminders, {}), // id -> { temp, time } edits
+  sheet: null,      // 'settings' while the reminders are being edited
 };
 let fs;
 let ordersRef;
@@ -60,84 +63,108 @@ const ago = (ms) => {
   const m = Math.floor((Date.now() - ms) / 60000);
   return m < 1 ? 'just now' : `${m} min`;
 };
-const clock = (ms) => new Date(ms).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+
+// ---------- patties (top rail) ----------
+
+// The cheese on each patty of a burger, bottom patty first. One slice per
+// patty; a double with both cheeses gets one of each; "extra" is one more
+// slice of that cheese.
+function pattyCheese(b) {
+  const chosen = CHEESES.filter((c) => b.cheese?.[c.id] && b.cheese[c.id] !== 'none');
+  const per = Array.from({ length: b.patties === 'double' ? 2 : 1 }, () => []);
+  if (per.length === 2 && chosen.length === 2) {
+    per[0].push(chosen[0].id);
+    per[1].push(chosen[1].id);
+  } else {
+    for (const p of per) for (const c of chosen) p.push(c.id);
+  }
+  for (const c of chosen) {
+    if (b.cheese[c.id] === 'extra') {
+      for (let i = per.length - 1; i >= 0; i--) if (per[i].includes(c.id)) { per[i].push(c.id); break; }
+    }
+  }
+  return per;
+}
+
+// Every patty on tickets not yet on the griddle, grouped by the cheese it gets.
+function pattyRail(open) {
+  const groups = new Map(); // "gruyere+american" -> { slices, n }
+  for (const o of open) {
+    if (o.cooking) continue;
+    for (const b of o.burgers || []) {
+      for (const slices of pattyCheese(b)) {
+        const key = slices.join('+') || 'plain';
+        const g = groups.get(key) || { slices, n: 0 };
+        g.n += b.qty;
+        groups.set(key, g);
+      }
+    }
+  }
+  const list = [...groups.values()].sort((a, b) => b.n - a.n);
+  const total = list.reduce((n, g) => n + g.n, 0);
+  const name = (id) => CHEESES.find((c) => c.id === id)?.label || id;
+  return `
+    <div class="patty-rail">
+      <div class="pr-count"><b>${total}</b><span>${total === 1 ? 'patty' : 'patties'}<br>to cook</span></div>
+      <div class="pr-chips">
+        ${list.length ? list.map((g) => `
+          <span class="pchip">
+            <b>${g.n}×</b>
+            ${g.slices.length
+              ? g.slices.map((id) => `<i class="slice ${id}">${name(id)}</i>`).join('<em>+</em>')
+              : '<i class="slice plain">No cheese</i>'}
+          </span>`).join('')
+        : `<span class="pr-none">${open.some((o) => o.cooking) ? 'Everything is on the griddle.' : 'Nothing waiting.'}</span>`}
+      </div>
+      ${total ? '<button class="griddle-btn" data-cooking>On the griddle ✓</button>' : ''}
+    </div>`;
+}
+
+// ---------- tickets (middle) ----------
 
 function ticket(o, number) {
   const extras = extrasList(o.extras);
   return `
-    <article class="ticket ${K.fresh.has(o.id) ? 'fresh' : ''}">
-      <header>
-        <span class="num">#${number}</span>
-        <h2>${esc(o.name)}</h2>
-        <span class="age">${ago(o.createdMs)}</span>
-      </header>
-      ${o.burgers.map((b) => {
-        const s = burgerSummary(b);
-        return `
-          <section class="tb">
-            <div class="q">${b.qty}×</div>
-            <div>
-              <h3>${s.title}</h3>
-              ${s.rows.filter((r) => r.items.length).map((r) => `<p><span class="k">${r.label}</span><span>${
-                r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')}</span></p>`).join('')}
-            </div>
-          </section>`;
-      }).join('')}
-      ${extras.length ? `<ul class="extras">${extras.map((e) => `<li><b>${e.qty}×</b>${e.label}</li>`).join('')}</ul>` : ''}
-      ${o.notes ? `<p class="note">${esc(o.notes)}</p>` : ''}
-      <button class="orderup" data-done="${o.id}">Order up!</button>
-    </article>`;
+    <div class="hang">
+      <article class="ticket ${K.fresh.has(o.id) ? 'fresh' : ''}">
+        <header>
+          <span class="num">#${number}</span>
+          <h2>${esc(o.name)}</h2>
+          <span class="age">${ago(o.createdMs)}</span>
+        </header>
+        <div class="t-body">
+        ${o.cooking ? `<button class="fire" data-uncook="${o.id}" aria-label="Not on the griddle yet">🔥 On the griddle</button>` : ''}
+        ${(o.burgers || []).map((b) => {
+          const s = burgerSummary(b);
+          return `
+            <section class="tb">
+              <div class="q">${b.qty}×</div>
+              <div>
+                <h3>${s.title}</h3>
+                ${s.rows.filter((r) => r.items.length).map((r) => `<p><span class="k">${r.label}</span><span>${
+                  r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')}</span></p>`).join('')}
+              </div>
+            </section>`;
+        }).join('')}
+        ${extras.length ? `<ul class="extras">${extras.map((e) => `<li><b>${e.qty}×</b>${e.label}</li>`).join('')}</ul>` : ''}
+        ${o.notes ? `<p class="note">${esc(o.notes)}</p>` : ''}
+        </div>
+        <button class="orderup" data-done="${o.id}">Order up!</button>
+      </article>
+    </div>`;
 }
 
-// Cheese slices one burger needs: one per patty; a double with both cheeses
-// gets one of each; "extra" is one more slice of that cheese.
-function cheeseSlices(b) {
-  const chosen = CHEESES.filter((c) => b.cheese?.[c.id] && b.cheese[c.id] !== 'none');
-  const patties = b.patties === 'double' ? 2 : 1;
-  return chosen.map((c) => [c.label,
-    (patties === 2 && chosen.length === 2 ? 1 : patties) + (b.cheese[c.id] === 'extra' ? 1 : 0)]);
-}
+// ---------- reminders (bottom rail) ----------
 
-// Everything on the open tickets, added up, so it can all go on at once.
-// Anything at zero isn't mentioned.
-function toCook(open) {
-  if (!open.length) return '';
-  let patties = 0;
-  const cheese = new Map();
-  const eggs = { runny: 0, hard: 0 };
-  for (const o of open) {
-    for (const b of o.burgers) {
-      patties += b.qty * (b.patties === 'double' ? 2 : 1);
-      for (const [label, n] of cheeseSlices(b)) cheese.set(label, (cheese.get(label) || 0) + b.qty * n);
-      if (b.egg in eggs) eggs[b.egg] += b.qty;
-    }
-  }
-  const chips = [
-    patties && `<b class="big">${patties} ${patties === 1 ? 'patty' : 'patties'}</b>`,
-    ...[...cheese].map(([label, n]) => `${n} ${label}`),
-    eggs.runny && `${eggs.runny} runny ${eggs.runny === 1 ? 'egg' : 'eggs'}`,
-    eggs.hard && `${eggs.hard} hard ${eggs.hard === 1 ? 'egg' : 'eggs'}`,
-    ...EXTRAS.map((e) => [e.label, open.reduce((n, o) => n + (o.extras?.[e.id] || 0), 0)])
-      .filter(([, n]) => n).map(([label, n]) => `${n} ${label}`),
-  ].filter(Boolean);
-  return `<div class="to-cook"><span class="lbl">To cook</span>${chips.map((c) => `<span class="chip">${c}</span>`).join('')}</div>`;
-}
+const reminder = (r) => ({ ...r, ...K.reminders[r.id] });
 
-// How long things take. Just reminders; nothing counts down.
-function reminders() {
-  const s = K.settings;
-  const m = (sec) => `${Math.round((sec / 60) * 10) / 10} min`;
-  const items = [
-    s.fries && ['Fries', m(s.fries)],
-    s.rings && ['Onion rings', m(s.rings)],
-    (s.side1 || s.side2) && ['Patties', [s.side1 && m(s.side1), s.side2 && m(s.side2)].filter(Boolean).join(', flip, ')],
-    s.runny && ['Runny egg', m(s.runny)],
-    s.hard && ['Hard egg', m(s.hard)],
-    s.onions && ['Onions', m(s.onions)],
-  ].filter(Boolean);
+function reminderRail() {
+  const items = REMINDERS.map(reminder).filter((r) => r.temp || r.time);
   return `
     <footer class="reminders">
-      ${items.map(([what, time]) => `<span class="rem"><span>${what}</span><b>${time}</b></span>`).join('')}
+      ${items.map((r) => `
+        <span class="rem"><span>${esc(r.label)}</span>
+          ${r.temp ? `<b class="temp">${esc(r.temp)}</b>` : ''}${r.time ? `<b>${esc(r.time)}</b>` : ''}</span>`).join('')}
       <button class="gear" data-open="settings" aria-label="Change the reminders">⚙</button>
     </footer>`;
 }
@@ -145,18 +172,23 @@ function reminders() {
 function settingsSheet() {
   return `
     <div class="sheet k-sheet" data-close>
-      <div class="sheet-panel" role="dialog" aria-label="Timer reminders">
-        <header><h2>Timer reminders</h2><button class="close" data-close aria-label="Close">✕</button></header>
+      <div class="sheet-panel" role="dialog" aria-label="Temps and times">
+        <header><h2>Temps &amp; times</h2><button class="close" data-close aria-label="Close">✕</button></header>
         <div class="sheet-body">
-          <p class="set-hint">Set one to 0 to hide it.</p>
-          ${Object.keys(LABELS).map((k) => `
-            <label class="set"><span>${LABELS[k]}</span>
-              <input type="number" inputmode="decimal" min="0" step="0.5" data-setting="${k}" value="${K.settings[k] / 60}"><em>min</em></label>`).join('')}
+          <p class="set-hint">Clear both boxes to hide one.</p>
+          ${REMINDERS.map(reminder).map((r) => `
+            <div class="set">
+              <span>${esc(r.label)}</span>
+              <input data-rem="${r.id}" data-field="temp" value="${esc(r.temp)}" aria-label="${esc(r.label)} heat" placeholder="Heat">
+              <input data-rem="${r.id}" data-field="time" value="${esc(r.time)}" aria-label="${esc(r.label)} time" placeholder="Time">
+            </div>`).join('')}
         </div>
         <footer><button class="primary" data-close>Done</button></footer>
       </div>
     </div>`;
 }
+
+// ---------- page ----------
 
 function render() {
   if (!K.started) {
@@ -177,34 +209,25 @@ function render() {
   const byTime = [...K.orders].sort((a, b) => a.createdMs - b.createdMs);
   const number = new Map(byTime.map((o, n) => [o.id, n + 1]));
   const open = byTime.filter((o) => o.status !== 'ready');
-  const done = byTime.filter((o) => o.status === 'ready').sort((a, b) => (b.readyMs || 0) - (a.readyMs || 0));
+  const last = byTime.filter((o) => o.status === 'ready').sort((a, b) => (b.readyMs || 0) - (a.readyMs || 0))[0];
 
   app.innerHTML = `
     <header class="k-top">
       <h1 class="neon">Kitchen</h1>
       <span class="count">${open.length ? `${open.length} to make` : 'All caught up'}</span>
-      ${K.offline ? '<span class="flag">Offline. Waiting for Wi-Fi…</span>' : ''}
+      ${K.offline ? '<span class="flag">Offline</span>' : ''}
       ${IS_TEST ? `<span class="flag">Test: ${esc(EVENT)}</span>` : ''}
+      ${last ? `<button class="put-back" data-undo="${last.id}">↶ Put back #${number.get(last.id)} ${esc(last.name)}</button>` : ''}
     </header>
     ${K.error ? `<p class="k-error">${esc(K.error)}</p>` : ''}
-    ${toCook(open)}
-    ${open.length
-      ? `<div class="rail"><div class="grid">${open.map((o) => ticket(o, number.get(o.id))).join('')}</div></div>`
-      : `<p class="empty">${K.loaded ? 'No orders on the rail. The bell rings when one comes in.' : 'Connecting…'}</p>`}
-    ${done.length ? `
-      <section class="done-list">
-        <h2>Order up</h2>
-        ${done.map((o) => `
-          <div class="done-row">
-            <span class="num">#${number.get(o.id)}</span>
-            <b>${esc(o.name)}</b>
-            <span>${o.readyMs ? clock(o.readyMs) : ''}</span>
-            <button data-undo="${o.id}">Put back</button>
-          </div>`).join('')}
-      </section>` : ''}
-    ${reminders()}
+    ${pattyRail(open)}
+    <main class="rail">
+      ${open.length
+        ? `<div class="tickets">${open.map((o) => ticket(o, number.get(o.id))).join('')}</div>`
+        : `<p class="empty">${K.loaded ? 'No orders on the rail. The bell rings when one comes in.' : 'Connecting…'}</p>`}
+    </main>
+    ${reminderRail()}
     ${K.sheet === 'settings' ? settingsSheet() : ''}`;
-  document.body.classList.toggle('locked', !!K.sheet);
 }
 
 app.addEventListener('click', (e) => {
@@ -220,6 +243,18 @@ app.addEventListener('click', (e) => {
   } else if ((el = t('[data-close]'))) {
     if (el.classList.contains('k-sheet') && e.target !== el) return; // a tap inside the panel
     K.sheet = null;
+  } else if (t('[data-cooking]')) {
+    // Everything showing in the top rail just went on the griddle.
+    for (const o of K.orders) {
+      if (o.status !== 'ready' && !o.cooking && (o.burgers || []).length) {
+        o.cooking = true;
+        fs.updateDoc(fs.doc(ordersRef, o.id), { cooking: true });
+      }
+    }
+  } else if ((el = t('[data-uncook]'))) {
+    const o = K.orders.find((x) => x.id === el.dataset.uncook);
+    if (o) o.cooking = false;
+    fs.updateDoc(fs.doc(ordersRef, el.dataset.uncook), { cooking: false });
   } else if ((el = t('[data-done]'))) {
     fs.updateDoc(fs.doc(ordersRef, el.dataset.done), { status: 'ready', readyMs: Date.now() });
     return;
@@ -232,13 +267,14 @@ app.addEventListener('click', (e) => {
   render();
 });
 
-app.addEventListener('change', (e) => {
-  const input = e.target.closest('[data-setting]');
+app.addEventListener('input', (e) => {
+  const input = e.target.closest('[data-rem]');
   if (!input) return;
-  const v = Number(input.value);
-  if (!(v >= 0)) return;
-  K.settings[input.dataset.setting] = Math.round(v * 60);
-  store.set(KEY.settings, K.settings);
+  const { rem, field } = input.dataset;
+  K.reminders[rem] = { ...reminder(REMINDERS.find((r) => r.id === rem)), [field]: input.value.trim() };
+  delete K.reminders[rem].id;
+  delete K.reminders[rem].label;
+  store.set(KEY.reminders, K.reminders);
 });
 
 setInterval(() => { if (K.started && !K.sheet) render(); }, 30000); // keep the "x min" ages fresh

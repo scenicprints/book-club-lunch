@@ -50,24 +50,35 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
   build cards, a rail column). It was built (commit 41bb21e) and Kevin
   pulled it: *"too complicated to follow… I don't need to follow directions
   to a T when I'm on my fifth burger."* **Keep the kitchen to one screen.**
-- ❌ Running/ringing timers. Kevin wants *reminders* of how long, not timers.
+- ❌ Running/ringing timers. Kevin wants *reminders* of heat + how long, not timers.
+- ❌ Page scrolling on the kitchen screen.
 - ❌ Crossing burgers off a ticket, and reading orders aloud. Both turned down.
 - ❌ A prep checklist on the kitchen screen. Kevin preps from the Pantry app
   (its brief is `host_brief.json` in `scenicprints/pantry-data`).
 
-## The kitchen (Kevin is cooking alone): ONE screen
+## The kitchen (Kevin is cooking alone): ONE screen, NO page scrolling
 
-- **Tickets on the rail**, oldest first, each with **Order up!**. Landscape
-  iPad fits 4 across.
-- **To cook** line under the header: everything on the open tickets added
-  up (patties, cheese slices by type, runny/hard eggs, sides, shakes) so
-  Kevin can get it all cooking at once. Zero counts aren't shown.
-- **Tickets only list what's on the burger.** Kevin: *"If something is not
-  included, it shouldn't even be mentioned."* No "No egg / No toppings" lines.
-- **Timer reminders** strip along the bottom: how long each thing takes
-  (fries, rings, patties before/after the flip, eggs, onions). Nothing
-  counts down or rings; Kevin sets his own timers. ⚙ edits the minutes
-  (defaults in `DEFAULTS`, cook.js); 0 hides one.
+Three bands, top to bottom (Kevin's layout, 2026-09-23):
+
+1. **Top rail: patties to cook.** Every patty on open tickets that isn't on
+   the griddle yet, grouped by the cheese that goes on it, with counts:
+   `5× Gruyère · 2× American · 1× American + American · 1× No cheese`.
+   A double with Gruyère + American shows as one Gruyère patty and one
+   American patty. Extra cheese = one more slice on that patty
+   (`pattyCheese()` in kitchen.js). Why: fries and rings cook constantly,
+   but patties are cooked to order in batches. Kevin cooks what the rail
+   says, then assembles tickets from that batch while the next batch cooks.
+   **On the griddle ✓** marks every order currently counted as cooking
+   (`cooking: true` on the order doc); the rail then shows only newer
+   orders' patties. Those tickets get a 🔥 tag; tapping it puts them back.
+2. **Middle: tickets** side by side on a rail (swipes sideways if more than
+   fit). Each ticket's **Order up!** is pinned to its bottom. Tickets list
+   only what's on the burger. **↶ Put back** in the header undoes the last
+   Order up.
+3. **Bottom rail: temps & times.** Reminders only, nothing counts down:
+   Fries 425°F 25 min · Onion rings 375°F 3 min · Patties 400°F 3 min, flip,
+   2 min · Runny egg Medium 3 min · Hard egg Medium 5 min (`REMINDERS`,
+   cook.js). ⚙ edits both fields as free text; clearing both hides one.
 
 **Kitchen facts Kevin gave:**
 - **Breaker:** the deep fryer and the griddle together trip the breaker. The
@@ -103,7 +114,7 @@ docs/
   menu.js      the menu + how a burger reads back (shared by both pages)
   fb.js        Firebase connection + the ?event= switch
   bell.js      the new-order ding (Web Audio, no sound file)
-  cook.js      timer-reminder defaults
+  cook.js      temps & times shown on the bottom rail
   styles.css   all styling (guest, builder, kitchen, sign)
 ```
 
@@ -133,12 +144,14 @@ docs/
   "status": "new",
   "createdMs": 1790200000000,
   "createdAt": "<server timestamp>",
-  "readyMs": 1790200600000
+  "readyMs": 1790200600000,
+  "cooking": true
 }
 ```
 Levels are `none | regular | extra`. `status` goes `new` → `ready` when Kevin
 taps **Order up!** (the kitchen's "Put back" sets it to `new` again).
-`readyMs` only exists once it's been marked done. (Orders made while cook mode
+`readyMs` only exists once it's been marked done. `cooking` is set by the
+kitchen's **On the griddle ✓** button. (Orders made while cook mode
 was live may also carry a `built` list; nothing reads it now.)
 
 Guest-side details: the order id is created before sending, so re-tapping
@@ -169,7 +182,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=7');
+const { connect } = await import('./fb.js?v=8');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -204,3 +217,6 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 - 2026-09-23: v7: timers → timer reminders (no countdown); tickets hide
   anything not on the burger; "To cook" totals line for cooking everything
   at once.
+- 2026-09-23: v8: kitchen is three fixed bands with no page scroll: top patty
+  rail (grouped by cheese, "On the griddle ✓"), tickets on a sideways rail,
+  bottom temps & times rail.

@@ -1,22 +1,11 @@
-// How long things take, shown along the bottom of the kitchen screen as
-// reminders (nothing counts down). Editable on the iPad under ⚙; 0 hides one.
+// The reminder rail along the bottom of the kitchen screen: what heat and how
+// long for each thing. Nothing counts down. Editable on the iPad under ⚙;
+// clearing both boxes hides one.
 
-export const DEFAULTS = {
-  side1: 180, // seconds before the flip
-  side2: 120, // seconds after the flip
-  fries: 1500,
-  rings: 180,
-  runny: 180,
-  hard: 300,
-  onions: 2400,
-};
-
-export const LABELS = {
-  fries: 'Fries',
-  rings: 'Onion rings',
-  side1: 'Patties, before the flip',
-  side2: 'Patties, after the flip',
-  runny: 'Runny egg',
-  hard: 'Hard egg',
-  onions: 'Onions',
-};
+export const REMINDERS = [
+  { id: 'fries', label: 'Fries', temp: '425°F', time: '25 min' },
+  { id: 'rings', label: 'Onion rings', temp: '375°F', time: '3 min' },
+  { id: 'patties', label: 'Patties', temp: '400°F', time: '3 min, flip, 2 min' },
+  { id: 'runny', label: 'Runny egg', temp: 'Medium', time: '3 min' },
+  { id: 'hard', label: 'Hard egg', temp: 'Medium', time: '5 min' },
+];
