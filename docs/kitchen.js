@@ -1,8 +1,8 @@
-import { EVENT, connect } from './fb.js?v=5';
-import { unlockBell, ring } from './bell.js?v=5';
-import { burgerSummary, extrasList, esc } from './menu.js?v=5';
-import { DEFAULTS, TIMER_LABELS, PREP } from './cook.js?v=5';
-import { startTimer, setPresets, fmt } from './timers.js?v=5';
+import { EVENT, connect } from './fb.js?v=6';
+import { unlockBell, ring } from './bell.js?v=6';
+import { burgerSummary, extrasList, esc } from './menu.js?v=6';
+import { DEFAULTS, TIMER_LABELS } from './cook.js?v=6';
+import { setPresets } from './timers.js?v=6';
 
 const app = document.getElementById('app');
 const IS_TEST = EVENT !== 'book-club-lunch-2026-09-26';
@@ -11,7 +11,7 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } },
 };
-const KEY = { settings: 'kitchen:settings', prep: `${EVENT}:prep` };
+const KEY = { settings: 'kitchen:settings' };
 
 const K = {
   started: false,
@@ -22,8 +22,7 @@ const K = {
   seen: new Set(),
   fresh: new Set(), // tickets that just arrived, swung onto the rail
   settings: { ...DEFAULTS, ...store.get(KEY.settings, {}) },
-  prep: new Set(store.get(KEY.prep, [])),
-  sheet: null,      // 'prep' | 'settings'
+  sheet: null,      // 'settings' while the timer lengths are open
 };
 let fs;
 let ordersRef;
@@ -95,28 +94,6 @@ function ticket(o, number) {
     </article>`;
 }
 
-function prepSheet() {
-  return `
-    <div class="sheet k-sheet" data-close>
-      <div class="sheet-panel wide" role="dialog" aria-label="Prep list">
-        <header><h2>Prep list</h2><button class="close" data-close aria-label="Close">✕</button></header>
-        <div class="sheet-body">
-          <ol class="prep">
-            ${PREP.map((p) => `
-              <li class="${K.prep.has(p.id) ? 'done' : ''} ${p.warn ? 'warn' : ''}">
-                <button class="check" data-prep="${p.id}" aria-pressed="${K.prep.has(p.id)}">
-                  <span class="box" aria-hidden="true">${K.prep.has(p.id) ? '✓' : ''}</span>
-                  <span class="what"><b>${p.text}</b>${p.note ? `<small>${p.note}</small>` : ''}</span>
-                </button>
-                ${p.timer ? `<button class="mini-timer" data-start-timer="${p.timer}">⏱ ${fmt(K.settings[p.timer])}</button>` : ''}
-              </li>`).join('')}
-          </ol>
-        </div>
-        <footer><button class="primary" data-close>Done</button></footer>
-      </div>
-    </div>`;
-}
-
 function settingsSheet() {
   return `
     <div class="sheet k-sheet" data-close>
@@ -152,8 +129,6 @@ function render() {
   const number = new Map(byTime.map((o, n) => [o.id, n + 1]));
   const open = byTime.filter((o) => o.status !== 'ready');
   const done = byTime.filter((o) => o.status === 'ready').sort((a, b) => (b.readyMs || 0) - (a.readyMs || 0));
-  const prepLeft = PREP.filter((p) => !K.prep.has(p.id)).length;
-  const scroll = app.querySelector('.sheet-body')?.scrollTop;
 
   app.innerHTML = `
     <header class="k-top">
@@ -161,7 +136,6 @@ function render() {
       <span class="count">${open.length ? `${open.length} to make` : 'All caught up'}</span>
       ${K.offline ? '<span class="flag">Offline. Waiting for Wi-Fi…</span>' : ''}
       ${IS_TEST ? `<span class="flag">Test: ${esc(EVENT)}</span>` : ''}
-      <button class="top-btn" data-open="prep">${prepLeft ? `Prep list <small>${prepLeft}</small>` : 'Prep list ✓'}</button>
       <button class="gear" data-open="settings" aria-label="Timer lengths">⚙</button>
     </header>
     ${K.error ? `<p class="k-error">${esc(K.error)}</p>` : ''}
@@ -179,9 +153,7 @@ function render() {
             <button data-undo="${o.id}">Put back</button>
           </div>`).join('')}
       </section>` : ''}
-    ${K.sheet === 'prep' ? prepSheet() : K.sheet === 'settings' ? settingsSheet() : ''}`;
-  const body = app.querySelector('.sheet-body');
-  if (body && scroll != null) body.scrollTop = scroll; // ticking an item keeps your place
+    ${K.sheet === 'settings' ? settingsSheet() : ''}`;
   document.body.classList.toggle('locked', !!K.sheet);
 }
 
@@ -195,14 +167,6 @@ app.addEventListener('click', (e) => {
     document.body.classList.add('started');
   } else if ((el = t('[data-open]'))) {
     K.sheet = el.dataset.open;
-  } else if ((el = t('[data-prep]'))) {
-    const id = el.dataset.prep;
-    if (K.prep.has(id)) K.prep.delete(id); else K.prep.add(id);
-    store.set(KEY.prep, [...K.prep]);
-  } else if ((el = t('[data-start-timer]'))) {
-    const k = el.dataset.startTimer;
-    startTimer(TIMER_LABELS[k], K.settings[k]);
-    return;
   } else if ((el = t('[data-close]'))) {
     if (el.classList.contains('k-sheet') && e.target !== el) return; // a tap inside the panel
     K.sheet = null;

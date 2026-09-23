@@ -8,9 +8,9 @@ cooks exactly what's on the ticket and taps **Order up!** to clear it.
 No app to install. It's a plain web page on GitHub Pages; Firebase is
 the invisible drop-off point between the guests' phones and the iPad.
 
-**This site replaces the Pantry app for this lunch.** Kevin is cooking from
-the kitchen screen, not from the Pantry app's chef. Don't update the
-`host_brief.json` brief in `scenicprints/pantry-data` for changes here.
+**Split of jobs:** this site takes the orders and runs the kitchen during
+the lunch. The **Pantry app** (brief: `host_brief.json` in
+`scenicprints/pantry-data`, named "Book Club Lunch") is what Kevin preps from.
 
 | Page | URL | Who |
 |---|---|---|
@@ -50,14 +50,13 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
   build cards, a rail column). It was built (commit 41bb21e) and Kevin
   pulled it: *"too complicated to follow… I don't need to follow directions
   to a T when I'm on my fifth burger."* **Keep the kitchen to one screen.**
+- ❌ A prep checklist on the kitchen screen. Kevin preps from the Pantry app
+  (its brief is `host_brief.json` in `scenicprints/pantry-data`).
 
 ## The kitchen (Kevin is cooking alone): ONE screen
 
 - **Tickets on the rail**, oldest first, each with **Order up!**. Landscape
   iPad fits 4 across.
-- **Prep list** button in the top bar opens the before-service checklist
-  (`PREP` in `cook.js`); some items have a timer button. Ticks are saved on
-  the iPad. The badge counts what's left.
 - **Timer dock** along the bottom: fries, onion rings, onions, flip the
   patties, patties done, runny eggs, hard eggs, all under **+ Timer**. A done
   timer rings until tapped. ⚙ sets the timer lengths (defaults in
@@ -97,7 +96,7 @@ docs/
   menu.js      the menu + how a burger reads back (shared by both pages)
   fb.js        Firebase connection + the ?event= switch
   bell.js      the new-order ding (Web Audio, no sound file)
-  cook.js      the prep list and timer defaults
+  cook.js      timer defaults
   timers.js    the timer dock (saved end times, rings until tapped)
   styles.css   all styling (guest, builder, kitchen, sign)
 ```
@@ -164,7 +163,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=5');
+const { connect } = await import('./fb.js?v=6');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -194,3 +193,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   replaces the Pantry app for this lunch.
 - 2026-09-23: v5: cook mode REMOVED at Kevin's request. Kitchen is one screen
   again: tickets + Prep list button + timer dock + ⚙ timer lengths.
+- 2026-09-23: v6: prep list removed from the kitchen (Kevin preps from the
+  Pantry app). Kitchen = tickets + timer dock + ⚙ timer lengths.

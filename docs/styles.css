@@ -582,37 +582,10 @@ body.sign-page { background: #fff; }
   body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
 
-/* ---------- kitchen: top-bar buttons, prep list, timers ---------- */
+/* ---------- kitchen: settings button, timers ---------- */
 
 body.kitchen.started { padding-bottom: 96px; }
-.top-btn {
-  margin-left: auto;
-  border: 2px solid var(--chrome);
-  border-radius: 999px;
-  background: transparent;
-  color: #fff;
-  font: 600 18px/1 var(--caps);
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  padding: 12px 18px 11px;
-}
-.k-top .flag ~ .top-btn { margin-left: 0; }
-.top-btn small { font: 700 13px/1 var(--caps); background: var(--red); color: #fff; border-radius: 999px; padding: 3px 7px 2px; margin-left: 4px; vertical-align: 2px; }
-.gear { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--chrome); background: transparent; color: #fff; font-size: 24px; }
-
-.mini-timer { flex-shrink: 0; border: 2px solid var(--ink); background: var(--yellow); border-radius: 999px; padding: 7px 14px; font: 700 16px/1 var(--caps); letter-spacing: .06em; }
-
-.prep { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 10px; }
-.prep li { display: flex; align-items: center; gap: 12px; background: var(--paper); border: 2px solid var(--ink); border-radius: 14px; padding: 4px 12px 4px 4px; }
-.prep li.warn { border-color: var(--red); background: #FFF0F0; }
-.prep li.done { background: #E3F2DA; border-color: #9DBB8D; }
-.prep li.done b { text-decoration: line-through; color: var(--muted); }
-.check { flex: 1; display: flex; align-items: center; gap: 14px; border: 0; background: transparent; text-align: left; padding: 9px 6px; }
-.check .box { flex-shrink: 0; width: 34px; height: 34px; border-radius: 10px; border: 3px solid var(--ink); display: grid; place-items: center; font-size: 20px; font-weight: 900; background: #fff; }
-.prep li.done .box { background: #3E6B2E; border-color: #3E6B2E; color: #fff; }
-.check .what b { display: block; font-size: 18px; }
-.check .what small { display: block; color: var(--muted); font-size: 14px; margin-top: 2px; }
-.prep li.warn .what b { color: var(--red-dark); }
+.gear { margin-left: auto; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--chrome); background: transparent; color: #fff; font-size: 24px; }
 
 /* timers dock */
 #timers { display: none; }
@@ -652,10 +625,9 @@ body.kitchen.started #timers {
 .timer-add { position: relative; background: var(--yellow); margin-left: auto; flex-shrink: 0; }
 .timer-add select { position: absolute; inset: 0; opacity: 0; font-size: 16px; }
 
-/* kitchen sheets (prep list, timer lengths) */
+/* kitchen sheet (timer lengths) */
 .k-sheet { align-items: center; z-index: 30; }
 .k-sheet .sheet-panel { color: var(--ink); max-width: 520px; max-height: 86vh; max-height: 86dvh; border-bottom: 2px solid var(--ink); border-radius: 24px; }
-.k-sheet .sheet-panel.wide { max-width: 720px; }
 .set { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); text-transform: none; letter-spacing: 0; font: 600 18px/1.2 var(--body); }
 .set span { flex: 1; }
 .set input { width: 96px; text-align: center; font-weight: 700; }
@@ -668,5 +640,5 @@ body.kitchen.started #timers {
 @media (max-width: 900px) {
   .k-top { gap: 10px; padding: 10px 14px 12px; }
   .k-top h1 { font-size: 38px; }
-  .top-btn { font-size: 16px; padding: 10px 13px 9px; }
 }
+.k-top .flag ~ .gear { margin-left: 0; }
