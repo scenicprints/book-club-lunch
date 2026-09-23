@@ -76,7 +76,9 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
    only what's on the burger. **↶ Put back** in the header undoes the last
    Order up.
 3. **Bottom rail: heat & time.** White pill chips on the silver bar (the
-   first design; Kevin liked it; don't restyle it). Heat is °F or his stove's
+   first design; Kevin liked it; don't restyle it). Each pill is two short
+   lines (name over numbers) so all 7 sit in **one row** on Kevin's iPad:
+   an **A16, 1180×820 in landscape**. He doesn't want them stacked. Heat is °F or his stove's
    0–10 dial: Parboil fries 9–10 → 3–4, 8–10 min · Fries 450°F 25, flip,
    15–20 min · Rings 375°F 3–4 min · Patties 7 3–4, flip, 2 min, 160°F ·
    Runny egg 5 2–3 min · Hard egg 5 4 min, flipped · Buns Medium 45–60 sec.
@@ -192,7 +194,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=11');
+const { connect } = await import('./fb.js?v=12');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -238,3 +240,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 - 2026-09-23: v11: bottom rail back to the first (pill) design with the
   corrected numbers. The v9 cards and the v10 thin text strip were both
   rejected; Kevin had only corrected the info, not the design.
+- 2026-09-23: v12: reminder pills are two lines (name over numbers), all in
+  one row on the iPad A16 (1180 wide), about 66px tall.

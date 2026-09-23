@@ -1,7 +1,7 @@
-import { EVENT, connect } from './fb.js?v=11';
-import { unlockBell, ring } from './bell.js?v=11';
-import { CHEESES, burgerSummary, extrasList, esc } from './menu.js?v=11';
-import { REMINDERS } from './cook.js?v=11';
+import { EVENT, connect } from './fb.js?v=12';
+import { unlockBell, ring } from './bell.js?v=12';
+import { CHEESES, burgerSummary, extrasList, esc } from './menu.js?v=12';
+import { REMINDERS } from './cook.js?v=12';
 
 // One screen, no scrolling: patties to cook along the top, tickets across the
 // middle, heat-and-time reminders along the bottom.
@@ -164,7 +164,7 @@ function reminderRail() {
     <footer class="reminders">
       ${items.map((r) => `
         <span class="rem"><span>${esc(r.label)}</span>
-          ${r.temp ? `<b class="temp">${esc(r.temp)}</b>` : ''}${r.time ? `<b>${esc(r.time)}</b>` : ''}</span>`).join('')}
+          <span class="rem-val">${r.temp ? `<b class="temp">${esc(r.temp)}</b>` : ''}${r.time ? `<b>${esc(r.time)}</b>` : ''}</span></span>`).join('')}
     </footer>`;
 }
 

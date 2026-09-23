@@ -673,3 +673,17 @@ body.kitchen.started .k-top h1 { font-size: 38px; }
 .k-top .count { margin-right: auto; }
 .k-top .flag, .k-top .put-back { margin-left: 0; }
 .k-top .gear { flex: none; width: 40px; height: 40px; font-size: 20px; border-color: var(--chrome); color: #fff; }
+
+/* each reminder pill is two short lines (name over numbers) so all of them
+   fit in one row on Kevin's iPad (A16, 1180 wide in landscape) */
+.reminders { flex-wrap: nowrap; justify-content: space-between; gap: 6px; padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); }
+.rem { flex-direction: column; align-items: flex-start; gap: 3px; border-radius: 16px; padding: 6px 10px; font-size: 12px; }
+.rem-val { display: flex; align-items: baseline; gap: 6px; }
+.rem b { font-size: 16px; }
+@media (max-width: 1000px) {
+  .reminders { flex-wrap: wrap; justify-content: flex-start; }
+}
+@media (max-width: 700px) {
+  .rem { font-size: 10px; padding: 5px 8px; }
+  .rem b { font-size: 13px; }
+}
