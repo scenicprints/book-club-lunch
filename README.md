@@ -38,7 +38,7 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
 - **Milkshakes**: Vanilla, Oreo (quantity each)
 - **Special requests** free-text box on every order
 - Guests type their **name**; they can **order again** for seconds.
-- **The House** one-tap button: the house burger (single, Gruyère,
+- **Bott's Roadside Burger** one-tap button (Kevin's name for it): the house burger (single, Gruyère,
   caramelized onion, special sauce) **plus fries**. "+ Build your own" opens
   the builder.
 - **The tray**: a drawing at the top of the order screen: fries carton and
@@ -66,6 +66,7 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
 - ❌ Page scrolling on the kitchen screen.
 - ❌ Crossing burgers off a ticket, and reading orders aloud. Both turned down.
 - ❌ "Same again" reorder button, and a guest-check review screen before sending. Both turned down.
+- ❌ Letter-board menu headers. Mocked up; Kevin prefers the original dashed-line headers.
 - ❌ A prep checklist on the kitchen screen. Kevin preps from the Pantry app
   (its brief is `host_brief.json` in `scenicprints/pantry-data`).
 
@@ -210,7 +211,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=13');
+const { connect } = await import('./fb.js?v=14');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -261,3 +262,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 - 2026-09-23: v13: guest side: The House + fries, tray drawing (fries/rings,
   burger, shakes), oozing runny yolk, big ticket number after sending, empty
   rows hidden. Letter-board menu headers: mockup shown, not built.
+- 2026-09-23: v14: the one-tap burger is named "Bott's Roadside Burger".
+  Letter-board headers declined; originals stay.

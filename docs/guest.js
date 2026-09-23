@@ -1,8 +1,8 @@
-import { EVENT, connect } from './fb.js?v=13';
+import { EVENT, connect } from './fb.js?v=14';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
   houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt,
-} from './menu.js?v=13';
+} from './menu.js?v=14';
 
 const app = document.getElementById('app');
 
@@ -162,7 +162,7 @@ function buildView() {
         </article>`).join('')}
       <button class="house" data-a="house">
         <span class="plus" aria-hidden="true">+</span>
-        <span><b>The House</b><small>Single · Gruyère · caramelized onion · special sauce, with fries</small></span>
+        <span><b>Bott's Roadside Burger</b><small>Single · Gruyère · caramelized onion · special sauce, with fries</small></span>
       </button>
       <button class="add" data-a="new-burger">+ Build your own</button>
     </section>
