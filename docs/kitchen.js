@@ -1,7 +1,7 @@
-import { EVENT, connect } from './fb.js?v=12';
-import { unlockBell, ring } from './bell.js?v=12';
-import { CHEESES, burgerSummary, extrasList, esc } from './menu.js?v=12';
-import { REMINDERS } from './cook.js?v=12';
+import { EVENT, connect } from './fb.js?v=13';
+import { unlockBell, ring } from './bell.js?v=13';
+import { CHEESES, burgerSummary, extrasList, esc, placedAt } from './menu.js?v=13';
+import { REMINDERS } from './cook.js?v=13';
 
 // One screen, no scrolling: patties to cook along the top, tickets across the
 // middle, heat-and-time reminders along the bottom.
@@ -130,7 +130,7 @@ function ticket(o, number) {
         <header>
           <span class="num">#${number}</span>
           <h2>${esc(o.name)}</h2>
-          <span class="age">${ago(o.createdMs)}</span>
+          <span class="age">${ago(placedAt(o))}</span>
         </header>
         <div class="t-body">
         ${o.cooking ? `<button class="fire" data-uncook="${o.id}" aria-label="Not on the griddle yet">🔥 On the griddle</button>` : ''}
@@ -205,7 +205,7 @@ function render() {
     return;
   }
   // Numbered in the order they came in, so "#4" means the same ticket all day.
-  const byTime = [...K.orders].sort((a, b) => a.createdMs - b.createdMs);
+  const byTime = [...K.orders].sort((a, b) => placedAt(a) - placedAt(b));
   const number = new Map(byTime.map((o, n) => [o.id, n + 1]));
   const open = byTime.filter((o) => o.status !== 'ready');
   const last = byTime.filter((o) => o.status === 'ready').sort((a, b) => (b.readyMs || 0) - (a.readyMs || 0))[0];

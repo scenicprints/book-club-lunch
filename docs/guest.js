@@ -1,8 +1,8 @@
-import { EVENT, connect } from './fb.js?v=12';
+import { EVENT, connect } from './fb.js?v=13';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
-  houseBurger, burgerSummary, extrasList, itemCount, esc,
-} from './menu.js?v=12';
+  houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt,
+} from './menu.js?v=13';
 
 const app = document.getElementById('app');
 
@@ -28,6 +28,21 @@ const S = {
 S.screen = S.name ? 'build' : 'start';
 
 const conn = connect();
+
+// Ticket numbers match the kitchen's: the nth order placed for this lunch.
+async function refreshNumbers() {
+  const { fs, orders } = await conn;
+  const all = (await fs.getDocs(orders)).docs
+    .map((d) => ({ id: d.id, at: placedAt(d.data()) }))
+    .sort((a, b) => a.at - b.at);
+  let changed = false;
+  for (const o of S.sent) {
+    const n = all.findIndex((x) => x.id === o.id) + 1;
+    if (o.id && n && n !== o.number) { o.number = n; changed = true; }
+  }
+  if (changed) { store.set(KEY.sent, S.sent); render(); }
+}
+conn.then(() => S.sent.some((o) => o.id) && refreshNumbers()).catch(() => {});
 conn.catch(() => {
   S.error = "Can't reach the kitchen right now. Check your signal and reload the page.";
   render();
@@ -59,6 +74,29 @@ function stack(b, { animate = false } = {}) {
   return `<div class="stack" aria-hidden="true">${html}</div>`;
 }
 
+// ---------- the tray: sides on one side, the burger, shakes on the other ----------
+
+const FRIES = `<div class="art fries">${'<i></i>'.repeat(7)}<b></b></div>`;
+const RINGS = '<div class="art rings"><i></i><i></i><i></i></div>';
+const SHAKE = (flavor) => `<div class="art shake ${flavor}"><span class="straw"></span><span class="top"></span><span class="glass"></span></div>`;
+
+let trayShown = {}; // counts last drawn, so only something just added drops in
+function trayView(t) {
+  const burgers = t.burgers.reduce((n, b) => n + b.qty, 0);
+  const e = t.extras;
+  if (!itemCount(t)) { trayShown = {}; return ''; }
+  const item = (key, n, art) => (n ? `
+    <div class="t-item ${n > (trayShown[key] || 0) ? 'drop' : ''}">${art}${n > 1 ? `<span class="n">×${n}</span>` : ''}</div>` : '');
+  const html = `
+    <div class="tray" aria-hidden="true">
+      <div class="tray-side left">${item('fries', e.fries, FRIES)}${item('rings', e.rings, RINGS)}</div>
+      <div class="tray-main">${item('burgers', burgers, `<div class="tray-burger">${burgers ? stack(t.burgers[t.burgers.length - 1]) : ''}</div>`)}</div>
+      <div class="tray-side right">${item('vanilla', e.vanilla, SHAKE('vanilla'))}${item('oreo', e.oreo, SHAKE('oreo'))}</div>
+    </div>`;
+  trayShown = { fries: e.fries, rings: e.rings, vanilla: e.vanilla, oreo: e.oreo, burgers };
+  return html;
+}
+
 // ---------- views ----------
 
 const seg = (options, value, action, attrs = '') => `
@@ -74,9 +112,9 @@ const stepper = (qty, action, attrs, min = 0, label = '') => `
     <button type="button" data-a="${action}" data-d="1" ${attrs} aria-label="One more ${label}">+</button>
   </div>`;
 
-const summaryHtml = (b) => burgerSummary(b).rows.map((r) => `<p><span class="k">${r.label}</span><span>${r.items.length
-  ? r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')
-  : `<i>${r.none}</i>`}</span></p>`).join('');
+// Only what's on the burger; anything left off isn't mentioned.
+const summaryHtml = (b) => burgerSummary(b).rows.filter((r) => r.items.length).map((r) => `<p><span class="k">${r.label}</span><span>${
+  r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')}</span></p>`).join('');
 
 const sign = (small = false) => `
   <header class="sign ${small ? 'small' : ''}">
@@ -105,6 +143,7 @@ function buildView() {
       <p>Order for <b>${esc(S.name)}</b> <button class="link" data-a="rename">change</button></p>
       ${S.sent.length ? '<button class="link" data-a="sent">Already ordered</button>' : ''}
     </div>
+    ${trayView(t)}
 
     <section>
       <h2 class="menu-head">Burgers</h2>
@@ -121,7 +160,11 @@ function buildView() {
             <button class="link danger" data-a="remove-burger" data-i="${i}">Remove</button>
           </div>
         </article>`).join('')}
-      <button class="add" data-a="new-burger">${t.burgers.length ? '+ Another burger' : '+ Build a burger'}</button>
+      <button class="house" data-a="house">
+        <span class="plus" aria-hidden="true">+</span>
+        <span><b>The House</b><small>Single · Gruyère · caramelized onion · special sauce, with fries</small></span>
+      </button>
+      <button class="add" data-a="new-burger">+ Build your own</button>
     </section>
 
     ${[['Sides', ''], ['Milkshakes', '']].map(([group]) => `
@@ -188,11 +231,12 @@ function sentView() {
   return `
     ${sign(true)}
     <span class="stamp">Order's in!</span>
+    ${orders[0]?.number ? `<div class="your-no"><span>Your number</span><b class="neon">#${orders[0].number}</b></div>` : ''}
     <p class="lede" style="text-align:center;color:var(--muted);margin:10px 0 22px">
       It's on its way to the kitchen, ${esc(S.name)}. Want seconds? Just order again.</p>
     ${orders.map((o, n) => `
       <article class="card sent">
-        <h3>${orders.length > 1 ? `Order ${orders.length - n}` : 'Your order'}</h3>
+        <h3>${o.number ? `Order #${o.number}` : orders.length > 1 ? `Order ${orders.length - n}` : 'Your order'}</h3>
         <ul>${orderLines(o).map((l) => `<li>${esc(l)}</li>`).join('')}</ul>
         ${o.notes ? `<p class="note">“${esc(o.notes)}”</p>` : ''}
       </article>`).join('')}
@@ -238,8 +282,9 @@ async function send() {
       new Promise((_, fail) => setTimeout(() => fail(new Error('timeout')), 15000)),
     ]);
     S.pendingId = null;
-    S.sent.push({ burgers: order.burgers, extras: order.extras, notes: order.notes });
+    S.sent.push({ id: ref.id, burgers: order.burgers, extras: order.extras, notes: order.notes });
     store.set(KEY.sent, S.sent);
+    refreshNumbers().catch(() => {});
     S.tray = emptyTray();
     S.screen = 'sent';
     window.scrollTo(0, 0);
@@ -281,6 +326,7 @@ app.addEventListener('click', (e) => {
     case 'sent': S.screen = 'sent'; window.scrollTo(0, 0); break;
     case 'more': S.screen = 'build'; window.scrollTo(0, 0); break;
     case 'new-burger': S.sheet = { index: -1, burger: houseBurger(), fresh: true }; break;
+    case 'house': t.burgers.push(houseBurger()); t.extras.fries += 1; break;
     case 'edit-burger': S.sheet = { index: +i, burger: structuredClone(t.burgers[+i]), fresh: true }; break;
     case 'remove-burger': t.burgers.splice(+i, 1); break;
     case 'burger-qty': t.burgers[+i].qty = clamp(t.burgers[+i].qty + +d, 1, 20); break;

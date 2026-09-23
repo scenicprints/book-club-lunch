@@ -67,5 +67,9 @@ export function itemCount(order) {
     + Object.values(order.extras).reduce((n, q) => n + q, 0);
 }
 
+// When an order was placed, by the server's clock once it has one, so every
+// phone and the kitchen agree on the order tickets came in (and their #).
+export const placedAt = (o) => o.createdAt?.toMillis?.() ?? o.createdMs;
+
 export const esc = (s) => String(s ?? '').replace(/[&<>"']/g,
   (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
