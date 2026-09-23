@@ -75,13 +75,13 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
    fit). Each ticket's **Order up!** is pinned to its bottom. Tickets list
    only what's on the burger. **↶ Put back** in the header undoes the last
    Order up.
-3. **Bottom rail: heat & time.** A thin dark strip of plain text. Kevin
-   said the card version was "massive", so keep it slim. Heat is °F or his
-   stove's 0–10 dial; no "oven/fryer/skillet" words. Parboil fries 9–10 → 3–4,
-   8–10 min · Fries 450°F 25, flip, 15–20 min · Rings 375°F 3–4 min ·
-   Patties 7 3–4, flip, 2 min, 160°F · Runny egg 5 2–3 min · Hard egg 5
-   4 min, flipped · Buns Med 45–60 sec. Numbers come from his Pantry recipes
-   (`REMINDERS`, cook.js). ⚙ (top bar) edits them; clearing both boxes hides one.
+3. **Bottom rail: heat & time.** White pill chips on the silver bar (the
+   first design; Kevin liked it; don't restyle it). Heat is °F or his stove's
+   0–10 dial: Parboil fries 9–10 → 3–4, 8–10 min · Fries 450°F 25, flip,
+   15–20 min · Rings 375°F 3–4 min · Patties 7 3–4, flip, 2 min, 160°F ·
+   Runny egg 5 2–3 min · Hard egg 5 4 min, flipped · Buns Medium 45–60 sec.
+   Numbers come from his Pantry recipes (`REMINDERS`, cook.js). **⚙ lives in
+   the top bar, not on this rail.** It edits these; clearing both boxes hides one.
 
 **Kitchen facts Kevin gave (don't guess past these; check his Pantry data first):**
 - Fries are **fresh-cut russets** (parboiled, then oven). Onion rings are
@@ -192,7 +192,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=10');
+const { connect } = await import('./fb.js?v=11');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -235,3 +235,6 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   patties/eggs, buns on the stovetop center griddle). One row of cards.
 - 2026-09-23: v10: bottom rail slimmed to a thin text strip (heat + time
   only); ⚙ moved to the top bar. About 62px on iPad, 63px on phone.
+- 2026-09-23: v11: bottom rail back to the first (pill) design with the
+  corrected numbers. The v9 cards and the v10 thin text strip were both
+  rejected; Kevin had only corrected the info, not the design.

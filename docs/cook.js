@@ -10,5 +10,5 @@ export const REMINDERS = [
   { id: 'patties', label: 'Patties', temp: '7', time: '3–4, flip, 2 min · 160°F' },
   { id: 'runny', label: 'Runny egg', temp: '5', time: '2–3 min' },
   { id: 'hard', label: 'Hard egg', temp: '5', time: '4 min, flipped' },
-  { id: 'buns', label: 'Buns', temp: 'Med', time: '45–60 sec' },
+  { id: 'buns', label: 'Buns', temp: 'Medium', time: '45–60 sec' },
 ];
