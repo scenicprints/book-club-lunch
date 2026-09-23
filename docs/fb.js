@@ -23,5 +23,10 @@ export async function connect() {
   });
   await auth.signInAnonymously(auth.getAuth(app));
   const db = fs.getFirestore(app);
-  return { fs, orders: fs.collection(db, 'leagues', EVENT, 'orders') };
+  return {
+    fs,
+    orders: fs.collection(db, 'leagues', EVENT, 'orders'),
+    // What the kitchen tells every phone: { soldOut: { fries: true, … }, closed }
+    state: fs.doc(db, 'leagues', EVENT, 'kitchen', 'state'),
+  };
 }

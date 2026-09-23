@@ -1,8 +1,8 @@
-import { EVENT, connect } from './fb.js?v=14';
+import { EVENT, connect } from './fb.js?v=15';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
-  houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt,
-} from './menu.js?v=14';
+  houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt, soldOutIn,
+} from './menu.js?v=15';
 
 const app = document.getElementById('app');
 
@@ -24,8 +24,18 @@ const S = {
   sending: false,
   error: '',
   pendingId: null,
+  notice: '',                    // e.g. "Onion rings just sold out, so we took them off…"
+  kitchen: { soldOut: {}, closed: false }, // set by the iPad
 };
 S.screen = S.name ? 'build' : 'start';
+
+const out = () => S.kitchen.soldOut || {};
+const listOf = (a) => (a.length < 2 ? a.join('') : `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}`);
+// Bott's Roadside Burger can't be made if any of its parts are gone.
+const houseOut = () => ['burgers', 'gruyere', 'onion', 'special'].some((id) => out()[id]);
+const QUICK = ['Cut in half', 'Sauce on the side', 'Extra crispy'];
+const noteParts = () => S.tray.notes.split(',').map((p) => p.trim()).filter(Boolean);
+const hasNote = (q) => noteParts().some((p) => p.toLowerCase() === q.toLowerCase());
 
 const conn = connect();
 
@@ -43,6 +53,18 @@ async function refreshNumbers() {
   if (changed) { store.set(KEY.sent, S.sent); render(); }
 }
 conn.then(() => S.sent.some((o) => o.id) && refreshNumbers()).catch(() => {});
+
+// Sold-out switches and closing time come live from the kitchen iPad.
+conn.then(({ fs, state }) => fs.onSnapshot(state, (snap) => {
+  S.kitchen = { soldOut: {}, closed: false, ...snap.data() };
+  const dropped = EXTRAS.filter((e) => out()[e.id] && S.tray.extras[e.id] > 0);
+  for (const e of dropped) S.tray.extras[e.id] = 0;
+  if (dropped.length) {
+    S.notice = `${listOf(dropped.map((e) => e.label))} just sold out, so we took that off your order.`;
+  }
+  if (S.kitchen.closed) S.sheet = null;
+  render();
+})).catch(() => {});
 conn.catch(() => {
   S.error = "Can't reach the kitchen right now. Check your signal and reload the page.";
   render();
@@ -143,6 +165,7 @@ function buildView() {
       <p>Order for <b>${esc(S.name)}</b> <button class="link" data-a="rename">change</button></p>
       ${S.sent.length ? '<button class="link" data-a="sent">Already ordered</button>' : ''}
     </div>
+    ${S.notice ? `<p class="notice">${esc(S.notice)}</p>` : ''}
     ${trayView(t)}
 
     <section>
@@ -160,11 +183,13 @@ function buildView() {
             <button class="link danger" data-a="remove-burger" data-i="${i}">Remove</button>
           </div>
         </article>`).join('')}
-      <button class="house" data-a="house">
-        <span class="plus" aria-hidden="true">+</span>
-        <span><b>Bott's Roadside Burger</b><small>Single · Gruyère · caramelized onion · special sauce, with fries</small></span>
-      </button>
-      <button class="add" data-a="new-burger">+ Build your own</button>
+      ${out().burgers ? '<p class="so-note">Burgers are sold out.</p>' : `
+        <button class="house" data-a="house" ${houseOut() ? 'disabled' : ''}>
+          <span class="plus" aria-hidden="true">+</span>
+          <span><b>Bott's Roadside Burger</b><small>${houseOut() ? 'Sold out'
+            : `Single · Gruyère · caramelized onion · special sauce${out().fries ? '' : ', with fries'}`}</small></span>
+        </button>
+        <button class="add" data-a="new-burger">+ Build your own</button>`}
     </section>
 
     ${[['Sides', ''], ['Milkshakes', '']].map(([group]) => `
@@ -172,13 +197,18 @@ function buildView() {
         <h2 class="menu-head">${group}</h2>
         <div class="card list">
           ${EXTRAS.filter((e) => e.group === group).map((e) => `
-            <div class="row"><span>${e.label}</span>${stepper(t.extras[e.id], 'extra', `data-id="${e.id}"`, 0, e.label)}</div>`).join('')}
+            <div class="row ${out()[e.id] ? 'soldout' : ''}"><span>${e.label}</span>${out()[e.id]
+              ? '<span class="so-tag">Sold out</span>'
+              : stepper(t.extras[e.id], 'extra', `data-id="${e.id}"`, 0, e.label)}</div>`).join('')}
         </div>
       </section>`).join('')}
 
     <section>
       <h2 class="menu-head">Special requests</h2>
-      <textarea id="notes" rows="2" maxlength="300" placeholder="Cut it in half, sauce on the side…">${esc(t.notes)}</textarea>
+      <div class="quick">${QUICK.map((q) => `
+        <button type="button" class="qchip ${hasNote(q) ? 'on' : ''}" data-a="quick" data-q="${q}" aria-pressed="${hasNote(q)}">${q}</button>`).join('')}
+      </div>
+      <textarea id="notes" rows="2" maxlength="300" placeholder="Anything else…">${esc(t.notes)}</textarea>
     </section>
 
     ${S.error ? `<p class="error">${esc(S.error)}</p>` : ''}
@@ -193,8 +223,15 @@ function buildView() {
 
 function sheetView() {
   const b = S.sheet.burger;
+  // Anything sold out comes off this burger, and its row says so.
+  for (const [list, group] of [[CHEESES, 'cheese'], [TOPPINGS, 'toppings'], [SAUCES, 'sauces']]) {
+    for (const i of list) if (out()[i.id]) b[group][i.id] = 'none';
+  }
+  if (out().egg) b.egg = 'none';
   const rows = (list, group) => list.map((i) => `
-    <div class="row"><span>${i.label}</span>${seg(LEVELS, b[group][i.id], 'set', `data-group="${group}" data-id="${i.id}"`)}</div>`).join('');
+    <div class="row ${out()[i.id] ? 'soldout' : ''}"><span>${i.label}</span>${out()[i.id]
+      ? '<span class="so-tag">Sold out</span>'
+      : seg(LEVELS, b[group][i.id], 'set', `data-group="${group}" data-id="${i.id}"`)}</div>`).join('');
   if (S.sheet.fresh) shown = new Set(layers(b).map(([key]) => key));
   return `
     <div class="sheet">
@@ -207,7 +244,7 @@ function sheetView() {
         <div class="sheet-body">
           <h3>Patties</h3>${seg(PATTIES, b.patties, 'set-one', 'data-key="patties"')}
           <h3>Cheese</h3><div class="card list">${rows(CHEESES, 'cheese')}</div>
-          <h3>Fried egg</h3>${seg(EGGS, b.egg, 'set-one', 'data-key="egg"')}
+          <h3>Fried egg</h3>${out().egg ? '<p class="so-line"><span class="so-tag">Sold out</span></p>' : seg(EGGS, b.egg, 'set-one', 'data-key="egg"')}
           <h3>Toppings</h3><div class="card list">${rows(TOPPINGS, 'toppings')}</div>
           <h3>Sauces</h3><div class="card list">${rows(SAUCES, 'sauces')}</div>
         </div>
@@ -245,10 +282,20 @@ function sentView() {
     </div></div>`;
 }
 
+function closedView() {
+  return `
+    ${sign()}
+    <div class="closed-box">
+      <h2 class="neon">Kitchen's closed</h2>
+      <p>Thanks for coming${S.name ? `, ${esc(S.name)}` : ''}!</p>
+    </div>`;
+}
+
 function render() {
   const scroll = app.querySelector('.sheet-body')?.scrollTop;
   app.innerHTML = `<div class="awning"></div><div class="wrap">${
-    S.screen === 'start' ? startView() : S.screen === 'sent' ? sentView() : buildView()
+    S.kitchen.closed ? closedView()
+      : S.screen === 'start' ? startView() : S.screen === 'sent' ? sentView() : buildView()
   }</div>`;
   const body = app.querySelector('.sheet-body');
   if (body && scroll != null) body.scrollTop = scroll;
@@ -259,6 +306,12 @@ function render() {
 // ---------- actions ----------
 
 async function send() {
+  const gone = soldOutIn(S.tray, out());
+  if (gone.length) {
+    S.error = `${listOf(gone)} just sold out. Change or remove ${gone.length > 1 ? 'them' : 'it'}, then send again.`;
+    render();
+    return;
+  }
   S.sending = true;
   S.error = '';
   render();
@@ -319,14 +372,24 @@ app.addEventListener('input', (e) => {
 app.addEventListener('click', (e) => {
   const el = e.target.closest('[data-a]');
   if (!el) return;
-  const { a, i, d, v, id, group, key } = el.dataset;
+  const { a, i, d, v, id, group, key, q } = el.dataset;
   const t = S.tray;
+  S.notice = '';
   switch (a) {
     case 'rename': S.screen = 'start'; break;
     case 'sent': S.screen = 'sent'; window.scrollTo(0, 0); break;
     case 'more': S.screen = 'build'; window.scrollTo(0, 0); break;
     case 'new-burger': S.sheet = { index: -1, burger: houseBurger(), fresh: true }; break;
-    case 'house': t.burgers.push(houseBurger()); t.extras.fries += 1; break;
+    case 'house':
+      if (houseOut()) return;
+      t.burgers.push(houseBurger());
+      if (!out().fries) t.extras.fries += 1;
+      break;
+    case 'quick': {
+      const parts = noteParts();
+      t.notes = (hasNote(q) ? parts.filter((p) => p.toLowerCase() !== q.toLowerCase()) : [...parts, q]).join(', ');
+      break;
+    }
     case 'edit-burger': S.sheet = { index: +i, burger: structuredClone(t.burgers[+i]), fresh: true }; break;
     case 'remove-burger': t.burgers.splice(+i, 1); break;
     case 'burger-qty': t.burgers[+i].qty = clamp(t.burgers[+i].qty + +d, 1, 20); break;

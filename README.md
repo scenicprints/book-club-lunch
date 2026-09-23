@@ -50,6 +50,8 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
   ("#4"), the same number as the kitchen ticket, so Kevin can call it out.
   Both sides number orders by server time (`placedAt()` in menu.js).
 - The guest's burger summary lists only what's on it (no "No egg" lines).
+- **Quick-request chips** above Special requests: Cut in half · Sauce on the
+  side · Extra crispy. Tap to add to the notes, tap again to remove.
 
 **Decided against (don't add back):**
 - ❌ "Your order is ready" alert on the guest's phone. Kevin dropped it.
@@ -98,6 +100,21 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
    Runny egg 5 2–3 min · Hard egg 5 4 min, flipped · Buns Medium 45–60 sec.
    Numbers come from his Pantry recipes (`REMINDERS`, cook.js). **⚙ lives in
    the top bar, not on this rail.** It edits these; clearing both boxes hides one.
+
+**Top-bar controls on the iPad** (added v15):
+- **Sold out**: switches for every orderable thing (burgers, each cheese, eggs,
+  each topping and sauce, fries, rings, each shake). Guests' phones grey it out
+  live; a side already in a guest's tray is taken off with a notice; a burger
+  using a sold-out ingredient can't be sent until it's changed. Bott's Roadside
+  Burger is disabled if burgers, Gruyère, caramelized onion or special sauce are
+  out; if only fries are out, it's added without fries.
+- **Close kitchen** (asks first) / **Reopen**: closed = guests see "Kitchen's
+  closed, thanks for coming!" instead of the menu. Tickets already on the rail
+  stay. Once closed and the rail is empty, the middle shows **the scoreboard**
+  (burgers, doubles, patties, fried eggs, sides, shakes, guests; zeros hidden).
+- **Ticket ageing**: a ticket's edge goes amber at 10 minutes, red at 15.
+- Sold-out and closed live in `leagues/<event>/kitchen/state`
+  (`{ soldOut: { id: true }, closed, closedMs }`); both pages listen to it.
 
 **Kitchen facts Kevin gave (don't guess past these; check his Pantry data first):**
 - Fries are **fresh-cut russets** (parboiled, then oven). Onion rings are
@@ -211,7 +228,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=14');
+const { connect } = await import('./fb.js?v=15');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -264,3 +281,6 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   rows hidden. Letter-board menu headers: mockup shown, not built.
 - 2026-09-23: v14: the one-tap burger is named "Bott's Roadside Burger".
   Letter-board headers declined; originals stay.
+- 2026-09-23: v15: sold-out switches, close/reopen the kitchen with the
+  end-of-lunch scoreboard, ageing tickets (amber 10 min, red 15), quick-request
+  chips. 3D-printable QR SVGs in `qr-3d/`.

@@ -28,6 +28,31 @@ export const EXTRAS = [
   { id: 'oreo', label: 'Oreo milkshake', group: 'Milkshakes' },
 ];
 
+// Everything the kitchen can mark sold out, grouped the way the switches show.
+export const STOCK = [
+  { group: 'Burgers', items: [{ id: 'burgers', label: 'Burgers' }] },
+  { group: 'Cheese', items: CHEESES },
+  { group: 'Eggs', items: [{ id: 'egg', label: 'Eggs' }] },
+  { group: 'Toppings', items: TOPPINGS },
+  { group: 'Sauces', items: SAUCES },
+  { group: 'Sides and shakes', items: EXTRAS },
+];
+
+// Names of anything in an order (or a guest's tray) that's sold out.
+export function soldOutIn(order, out = {}) {
+  const hit = new Set();
+  const burgers = order.burgers || [];
+  if (burgers.length && out.burgers) hit.add('Burgers');
+  for (const b of burgers) {
+    for (const [list, levels] of [[CHEESES, b.cheese], [TOPPINGS, b.toppings], [SAUCES, b.sauces]]) {
+      for (const i of list) if (out[i.id] && levels?.[i.id] && levels[i.id] !== 'none') hit.add(i.label);
+    }
+    if (out.egg && b.egg && b.egg !== 'none') hit.add('Eggs');
+  }
+  for (const e of EXTRAS) if (out[e.id] && order.extras?.[e.id] > 0) hit.add(e.label);
+  return [...hit];
+}
+
 // The house burger — what the builder opens on.
 export function houseBurger() {
   return {

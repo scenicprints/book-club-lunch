@@ -794,3 +794,62 @@ body.kitchen.started .k-top h1 { font-size: 38px; }
 .tray { gap: 6px; padding: 16px 10px 12px; }
 .tray-side { gap: 4px; }
 .tray-burger { width: 80px; }
+
+/* ---------- sold out, closing time, ageing tickets, quick requests, scoreboard ---------- */
+
+/* kitchen top-bar buttons */
+.top-btn {
+  flex: none;
+  border: 2px solid var(--chrome);
+  border-radius: 999px;
+  background: transparent;
+  color: #fff;
+  font: 600 16px/1 var(--caps);
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  padding: 11px 15px 10px;
+}
+.top-btn small { font: 700 13px/1 var(--caps); background: var(--red); color: #fff; border-radius: 999px; padding: 3px 7px 2px; margin-left: 4px; vertical-align: 2px; }
+.k-top .flag.shut { background: var(--red); color: #fff; }
+
+/* sold-out switches */
+.k-sheet .sheet-panel.wide { max-width: 760px; }
+.k-sheet .sheet-body h3 { margin: 16px 0 8px; font: 700 15px/1 var(--caps); letter-spacing: .12em; text-transform: uppercase; }
+.so-group { display: flex; flex-wrap: wrap; gap: 8px; }
+.so-pill { border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); padding: 10px 16px 9px; font: 600 17px/1 var(--caps); letter-spacing: .04em; text-transform: uppercase; }
+.so-pill.on { background: var(--red); border-color: var(--red-dark); color: #fff; }
+
+/* tickets that have been waiting a while */
+.hang .ticket.waiting { box-shadow: 0 0 0 5px var(--yellow), 0 10px 22px rgba(0, 0, 0, .45); }
+.hang .ticket.late { box-shadow: 0 0 0 5px var(--red), 0 10px 22px rgba(0, 0, 0, .45); }
+.ticket.waiting .age { color: #8A5A00; font-weight: 700; }
+.ticket.late .age { color: var(--red-dark); font-weight: 700; }
+
+/* the scoreboard */
+.scoreboard { margin: auto; text-align: center; padding: 10px 20px; }
+.scoreboard h2 { margin: 0 0 18px; font: 400 64px/1 var(--script); }
+.sb-grid { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px 34px; max-width: 980px; }
+.sb { display: flex; flex-direction: column; align-items: center; min-width: 110px; }
+.sb b { font: 400 76px/1 var(--script); }
+.sb span { margin-top: 4px; font: 600 16px/1 var(--caps); letter-spacing: .14em; text-transform: uppercase; color: var(--chrome); }
+.rail:has(.scoreboard) { display: flex; }
+
+/* guest: sold out */
+.so-tag { flex: none; font: 700 13px/1 var(--caps); letter-spacing: .1em; text-transform: uppercase; color: #fff; background: var(--muted); border-radius: 6px; padding: 5px 8px 4px; }
+.row.soldout > span:first-child { color: var(--muted); text-decoration: line-through; }
+.so-note { margin: 0 0 12px; padding: 14px 16px; border: 2px dashed var(--muted); border-radius: 14px; font: 600 18px/1.2 var(--caps); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); text-align: center; }
+.so-line { margin: 0; }
+.house:disabled { background: #E7DFD2; color: var(--muted); box-shadow: 4px 4px 0 #BDB3A8; border-color: #BDB3A8; }
+.house:disabled .plus { background: #BDB3A8; border-color: #BDB3A8; }
+.house:disabled small { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
+.notice { margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: #FFE9A8; border: 2px solid #D9A400; font-weight: 600; }
+
+/* guest: quick requests */
+.quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.qchip { border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); padding: 9px 14px 8px; font: 600 15px/1 var(--caps); letter-spacing: .05em; text-transform: uppercase; }
+.qchip.on { background: var(--ink); color: #fff; }
+
+/* guest: closing time */
+.closed-box { margin-top: 26px; text-align: center; }
+.closed-box h2 { margin: 0; font: 400 58px/1.1 var(--script); }
+.closed-box p { margin: 12px 0 0; font-size: 18px; color: var(--muted); }
