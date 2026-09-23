@@ -1,8 +1,7 @@
-import { EVENT, connect } from './fb.js?v=6';
-import { unlockBell, ring } from './bell.js?v=6';
-import { burgerSummary, extrasList, esc } from './menu.js?v=6';
-import { DEFAULTS, TIMER_LABELS } from './cook.js?v=6';
-import { setPresets } from './timers.js?v=6';
+import { EVENT, connect } from './fb.js?v=7';
+import { unlockBell, ring } from './bell.js?v=7';
+import { CHEESES, EXTRAS, burgerSummary, extrasList, esc } from './menu.js?v=7';
+import { DEFAULTS, LABELS } from './cook.js?v=7';
 
 const app = document.getElementById('app');
 const IS_TEST = EVENT !== 'book-club-lunch-2026-09-26';
@@ -26,9 +25,6 @@ const K = {
 };
 let fs;
 let ordersRef;
-
-const presets = () => Object.keys(TIMER_LABELS).map((k) => [TIMER_LABELS[k], K.settings[k]]);
-setPresets(presets());
 
 connect().then((c) => {
   ({ fs } = c);
@@ -82,9 +78,8 @@ function ticket(o, number) {
             <div class="q">${b.qty}×</div>
             <div>
               <h3>${s.title}</h3>
-              ${s.rows.map((r) => `<p><span class="k">${r.label}</span><span>${r.items.length
-                ? r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')
-                : `<i>${r.none}</i>`}</span></p>`).join('')}
+              ${s.rows.filter((r) => r.items.length).map((r) => `<p><span class="k">${r.label}</span><span>${
+                r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')}</span></p>`).join('')}
             </div>
           </section>`;
       }).join('')}
@@ -94,15 +89,69 @@ function ticket(o, number) {
     </article>`;
 }
 
+// Cheese slices one burger needs: one per patty; a double with both cheeses
+// gets one of each; "extra" is one more slice of that cheese.
+function cheeseSlices(b) {
+  const chosen = CHEESES.filter((c) => b.cheese?.[c.id] && b.cheese[c.id] !== 'none');
+  const patties = b.patties === 'double' ? 2 : 1;
+  return chosen.map((c) => [c.label,
+    (patties === 2 && chosen.length === 2 ? 1 : patties) + (b.cheese[c.id] === 'extra' ? 1 : 0)]);
+}
+
+// Everything on the open tickets, added up, so it can all go on at once.
+// Anything at zero isn't mentioned.
+function toCook(open) {
+  if (!open.length) return '';
+  let patties = 0;
+  const cheese = new Map();
+  const eggs = { runny: 0, hard: 0 };
+  for (const o of open) {
+    for (const b of o.burgers) {
+      patties += b.qty * (b.patties === 'double' ? 2 : 1);
+      for (const [label, n] of cheeseSlices(b)) cheese.set(label, (cheese.get(label) || 0) + b.qty * n);
+      if (b.egg in eggs) eggs[b.egg] += b.qty;
+    }
+  }
+  const chips = [
+    patties && `<b class="big">${patties} ${patties === 1 ? 'patty' : 'patties'}</b>`,
+    ...[...cheese].map(([label, n]) => `${n} ${label}`),
+    eggs.runny && `${eggs.runny} runny ${eggs.runny === 1 ? 'egg' : 'eggs'}`,
+    eggs.hard && `${eggs.hard} hard ${eggs.hard === 1 ? 'egg' : 'eggs'}`,
+    ...EXTRAS.map((e) => [e.label, open.reduce((n, o) => n + (o.extras?.[e.id] || 0), 0)])
+      .filter(([, n]) => n).map(([label, n]) => `${n} ${label}`),
+  ].filter(Boolean);
+  return `<div class="to-cook"><span class="lbl">To cook</span>${chips.map((c) => `<span class="chip">${c}</span>`).join('')}</div>`;
+}
+
+// How long things take. Just reminders; nothing counts down.
+function reminders() {
+  const s = K.settings;
+  const m = (sec) => `${Math.round((sec / 60) * 10) / 10} min`;
+  const items = [
+    s.fries && ['Fries', m(s.fries)],
+    s.rings && ['Onion rings', m(s.rings)],
+    (s.side1 || s.side2) && ['Patties', [s.side1 && m(s.side1), s.side2 && m(s.side2)].filter(Boolean).join(', flip, ')],
+    s.runny && ['Runny egg', m(s.runny)],
+    s.hard && ['Hard egg', m(s.hard)],
+    s.onions && ['Onions', m(s.onions)],
+  ].filter(Boolean);
+  return `
+    <footer class="reminders">
+      ${items.map(([what, time]) => `<span class="rem"><span>${what}</span><b>${time}</b></span>`).join('')}
+      <button class="gear" data-open="settings" aria-label="Change the reminders">⚙</button>
+    </footer>`;
+}
+
 function settingsSheet() {
   return `
     <div class="sheet k-sheet" data-close>
-      <div class="sheet-panel" role="dialog" aria-label="Timer lengths">
-        <header><h2>Timer lengths</h2><button class="close" data-close aria-label="Close">✕</button></header>
+      <div class="sheet-panel" role="dialog" aria-label="Timer reminders">
+        <header><h2>Timer reminders</h2><button class="close" data-close aria-label="Close">✕</button></header>
         <div class="sheet-body">
-          ${Object.keys(TIMER_LABELS).map((k) => `
-            <label class="set"><span>${TIMER_LABELS[k]}</span>
-              <input type="number" inputmode="decimal" min="0.5" step="0.5" data-setting="${k}" value="${K.settings[k] / 60}"><em>min</em></label>`).join('')}
+          <p class="set-hint">Set one to 0 to hide it.</p>
+          ${Object.keys(LABELS).map((k) => `
+            <label class="set"><span>${LABELS[k]}</span>
+              <input type="number" inputmode="decimal" min="0" step="0.5" data-setting="${k}" value="${K.settings[k] / 60}"><em>min</em></label>`).join('')}
         </div>
         <footer><button class="primary" data-close>Done</button></footer>
       </div>
@@ -136,9 +185,9 @@ function render() {
       <span class="count">${open.length ? `${open.length} to make` : 'All caught up'}</span>
       ${K.offline ? '<span class="flag">Offline. Waiting for Wi-Fi…</span>' : ''}
       ${IS_TEST ? `<span class="flag">Test: ${esc(EVENT)}</span>` : ''}
-      <button class="gear" data-open="settings" aria-label="Timer lengths">⚙</button>
     </header>
     ${K.error ? `<p class="k-error">${esc(K.error)}</p>` : ''}
+    ${toCook(open)}
     ${open.length
       ? `<div class="rail"><div class="grid">${open.map((o) => ticket(o, number.get(o.id))).join('')}</div></div>`
       : `<p class="empty">${K.loaded ? 'No orders on the rail. The bell rings when one comes in.' : 'Connecting…'}</p>`}
@@ -153,6 +202,7 @@ function render() {
             <button data-undo="${o.id}">Put back</button>
           </div>`).join('')}
       </section>` : ''}
+    ${reminders()}
     ${K.sheet === 'settings' ? settingsSheet() : ''}`;
   document.body.classList.toggle('locked', !!K.sheet);
 }
@@ -186,10 +236,9 @@ app.addEventListener('change', (e) => {
   const input = e.target.closest('[data-setting]');
   if (!input) return;
   const v = Number(input.value);
-  if (!(v > 0)) return;
+  if (!(v >= 0)) return;
   K.settings[input.dataset.setting] = Math.round(v * 60);
   store.set(KEY.settings, K.settings);
-  setPresets(presets());
 });
 
 setInterval(() => { if (K.started && !K.sheet) render(); }, 30000); // keep the "x min" ages fresh

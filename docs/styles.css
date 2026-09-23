@@ -585,52 +585,41 @@ body.sign-page { background: #fff; }
 /* ---------- kitchen: settings button, timers ---------- */
 
 body.kitchen.started { padding-bottom: 96px; }
-.gear { margin-left: auto; width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--chrome); background: transparent; color: #fff; font-size: 24px; }
+.gear { width: 48px; height: 48px; border-radius: 50%; border: 2px solid var(--chrome); background: transparent; color: #fff; font-size: 24px; }
 
-/* timers dock */
-#timers { display: none; }
-body.kitchen.started #timers {
-  display: flex;
-  align-items: center;
-  gap: 10px;
+/* timer reminders: a strip along the bottom, nothing counts down */
+.reminders {
   position: fixed;
   left: 0;
   right: 0;
   bottom: 0;
   z-index: 20;
-  padding: 12px 20px calc(12px + env(safe-area-inset-bottom));
-  background: linear-gradient(#E9ECEF, #AEB4BA);
-  border-top: 3px solid #6B7178;
-  overflow-x: auto;
-}
-#timers .chips { display: flex; gap: 10px; }
-.timer {
   display: flex;
   align-items: center;
-  gap: 10px;
-  white-space: nowrap;
-  border: 2px solid var(--ink);
-  border-radius: 999px;
-  background: var(--paper);
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+  background: linear-gradient(#E9ECEF, #AEB4BA);
+  border-top: 3px solid #6B7178;
   color: var(--ink);
-  padding: 10px 16px;
-  font: 600 18px/1 var(--caps);
-  letter-spacing: .04em;
 }
-.timer b { font-size: 24px; min-width: 3ch; }
-.timer i { font-style: normal; color: var(--muted); }
-.timer.ringing { background: var(--red); color: #fff; animation: pulse .5s infinite alternate; }
-.timer.ringing i { color: #fff; }
-@keyframes pulse { to { transform: scale(1.08); } }
-.timer-add { position: relative; background: var(--yellow); margin-left: auto; flex-shrink: 0; }
-.timer-add select { position: absolute; inset: 0; opacity: 0; font-size: 16px; }
+.rem { display: flex; align-items: baseline; gap: 6px; background: var(--paper); border: 2px solid var(--ink); border-radius: 999px; padding: 7px 12px 6px; white-space: nowrap; font: 600 15px/1 var(--caps); letter-spacing: .03em; text-transform: uppercase; }
+.rem b { font-size: 18px; color: var(--red-dark); text-transform: none; }
+.reminders .gear { margin-left: auto; width: 42px; height: 42px; font-size: 21px; border-color: var(--ink); color: var(--ink); }
 
-/* kitchen sheet (timer lengths) */
+/* the To cook line: everything on the rail, added up */
+.to-cook { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 12px 24px; background: #141010; border-bottom: 2px solid #3B332E; }
+.to-cook .lbl { font: 700 16px/1 var(--caps); letter-spacing: .16em; text-transform: uppercase; color: var(--chrome); margin-right: 4px; }
+.to-cook .chip { background: var(--cream); color: var(--ink); border-radius: 10px; padding: 8px 12px 7px; font: 600 20px/1 var(--caps); letter-spacing: .03em; }
+.to-cook .chip .big { font-weight: 700; color: var(--red-dark); }
+
+/* kitchen sheet (timer reminders) */
 .k-sheet { align-items: center; z-index: 30; }
 .k-sheet .sheet-panel { color: var(--ink); max-width: 520px; max-height: 86vh; max-height: 86dvh; border-bottom: 2px solid var(--ink); border-radius: 24px; }
 .set { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px dashed var(--line); text-transform: none; letter-spacing: 0; font: 600 18px/1.2 var(--body); }
 .set span { flex: 1; }
 .set input { width: 96px; text-align: center; font-weight: 700; }
+.set-hint { margin: 10px 0 4px; color: var(--muted); }
 .set em { width: 32px; font-style: normal; color: var(--muted); font-size: 15px; }
 
 /* landscape iPad: more tickets across */
@@ -641,4 +630,3 @@ body.kitchen.started #timers {
   .k-top { gap: 10px; padding: 10px 14px 12px; }
   .k-top h1 { font-size: 38px; }
 }
-.k-top .flag ~ .gear { margin-left: 0; }

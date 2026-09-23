@@ -50,6 +50,8 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
   build cards, a rail column). It was built (commit 41bb21e) and Kevin
   pulled it: *"too complicated to follow… I don't need to follow directions
   to a T when I'm on my fifth burger."* **Keep the kitchen to one screen.**
+- ❌ Running/ringing timers. Kevin wants *reminders* of how long, not timers.
+- ❌ Crossing burgers off a ticket, and reading orders aloud. Both turned down.
 - ❌ A prep checklist on the kitchen screen. Kevin preps from the Pantry app
   (its brief is `host_brief.json` in `scenicprints/pantry-data`).
 
@@ -57,10 +59,15 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
 
 - **Tickets on the rail**, oldest first, each with **Order up!**. Landscape
   iPad fits 4 across.
-- **Timer dock** along the bottom: fries, onion rings, onions, flip the
-  patties, patties done, runny eggs, hard eggs, all under **+ Timer**. A done
-  timer rings until tapped. ⚙ sets the timer lengths (defaults in
-  `DEFAULTS`, cook.js).
+- **To cook** line under the header: everything on the open tickets added
+  up (patties, cheese slices by type, runny/hard eggs, sides, shakes) so
+  Kevin can get it all cooking at once. Zero counts aren't shown.
+- **Tickets only list what's on the burger.** Kevin: *"If something is not
+  included, it shouldn't even be mentioned."* No "No egg / No toppings" lines.
+- **Timer reminders** strip along the bottom: how long each thing takes
+  (fries, rings, patties before/after the flip, eggs, onions). Nothing
+  counts down or rings; Kevin sets his own timers. ⚙ edits the minutes
+  (defaults in `DEFAULTS`, cook.js); 0 hides one.
 
 **Kitchen facts Kevin gave:**
 - **Breaker:** the deep fryer and the griddle together trip the breaker. The
@@ -96,8 +103,7 @@ docs/
   menu.js      the menu + how a burger reads back (shared by both pages)
   fb.js        Firebase connection + the ?event= switch
   bell.js      the new-order ding (Web Audio, no sound file)
-  cook.js      timer defaults
-  timers.js    the timer dock (saved end times, rings until tapped)
+  cook.js      timer-reminder defaults
   styles.css   all styling (guest, builder, kitchen, sign)
 ```
 
@@ -163,7 +169,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=6');
+const { connect } = await import('./fb.js?v=7');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -195,3 +201,6 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   again: tickets + Prep list button + timer dock + ⚙ timer lengths.
 - 2026-09-23: v6: prep list removed from the kitchen (Kevin preps from the
   Pantry app). Kitchen = tickets + timer dock + ⚙ timer lengths.
+- 2026-09-23: v7: timers → timer reminders (no countdown); tickets hide
+  anything not on the burger; "To cook" totals line for cooking everything
+  at once.
