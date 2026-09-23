@@ -131,7 +131,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=2');
+const { connect } = await import('./fb.js?v=3');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -153,3 +153,6 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   explanation line from the guest front page (Kevin's call).
   `kitchen-qr.png` opens the kitchen on the iPad; `book-club-lunch-qr.png`
   is the guest QR.
+- 2026-09-23: v3: neon sits straight on the cream background. Kevin did
+  NOT like it on a black board, so don't bring the dark board back. (The
+  kitchen's full-width dark top bar is unchanged.)

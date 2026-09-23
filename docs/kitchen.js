@@ -1,6 +1,6 @@
-import { EVENT, connect } from './fb.js?v=2';
-import { unlockBell, ring } from './bell.js?v=2';
-import { burgerSummary, extrasList, esc } from './menu.js?v=2';
+import { EVENT, connect } from './fb.js?v=3';
+import { unlockBell, ring } from './bell.js?v=3';
+import { burgerSummary, extrasList, esc } from './menu.js?v=3';
 
 const app = document.getElementById('app');
 const IS_TEST = EVENT !== 'book-club-lunch-2026-09-26';

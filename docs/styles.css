@@ -51,44 +51,42 @@ button:disabled { cursor: default; }
 
 .wrap { max-width: 560px; margin: 0 auto; padding: 8px 16px 132px; }
 
-/* Neon: a dark sign board with glowing tubes. Red script, mint caps. */
+/* Neon: glowing tubes straight on the cream wall. Red script, mint caps. */
 .sign { text-align: center; padding: 18px 0 8px; }
-.board {
-  display: inline-block;
-  padding: 14px 34px 20px;
-  background: radial-gradient(ellipse at 50% 40%, #2B2421, #141010 75%);
-  border: 3px solid #3B332E;
-  border-radius: 20px;
-  box-shadow:
-    inset 0 0 24px rgba(0, 0, 0, .7),
-    0 0 40px rgba(255, 50, 70, .22),
-    0 5px 0 var(--ink);
-}
+.board { display: inline-block; padding: 4px 12px 8px; }
 .sign .kicker {
   display: inline-block;
   font: 600 13px/1 var(--caps);
   letter-spacing: .3em;
   text-transform: uppercase;
-  color: #EFFFFA;
+  color: #0E9F82;
   padding: 6px 10px 5px 14px;
-  border: 2px solid #EFFFFA;
+  border: 2px solid #19C29F;
   border-radius: 999px;
-  text-shadow: 0 0 3px #fff, 0 0 8px var(--neon-mint), 0 0 16px var(--neon-mint);
-  box-shadow: 0 0 6px var(--neon-mint), 0 0 14px var(--neon-mint), inset 0 0 6px var(--neon-mint);
+  text-shadow: 0 0 6px rgba(61, 255, 208, .8);
+  box-shadow: 0 0 8px rgba(61, 255, 208, .7), inset 0 0 6px rgba(61, 255, 208, .5);
   animation: buzz-mint 11s infinite 2s;
 }
 .sign h1 { margin: 8px 0 0; font: 400 64px/1 var(--script); transform: rotate(-4deg); }
 .sign.small h1 { font-size: 52px; }
 .neon {
+  color: #FF2E48;
+  text-shadow:
+    0 0 1px #FF8A96,
+    0 0 8px rgba(255, 42, 69, .75),
+    0 0 20px rgba(255, 42, 69, .5),
+    0 0 40px rgba(255, 42, 69, .3);
+  animation: ignite 1.6s both, buzz 7s infinite 3s;
+}
+/* On the kitchen's dark top bar the tube burns white-hot at the core. */
+.k-top .neon {
   color: #FFF1F2;
   text-shadow:
     0 0 2px #fff,
     0 0 6px #FF6B7A,
     0 0 14px var(--neon-red),
     0 0 28px var(--neon-red),
-    0 0 48px var(--neon-red),
-    0 0 80px #C0142A;
-  animation: ignite 1.6s both, buzz 7s infinite 3s;
+    0 0 48px var(--neon-red);
 }
 /* switching on: a couple of stutters, then it holds */
 @keyframes ignite {
