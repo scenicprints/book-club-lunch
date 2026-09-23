@@ -2,7 +2,7 @@
 // updates the numbers, so nothing under your finger gets rebuilt. End times
 // are saved, so reloading the iPad doesn't lose a timer. A finished timer
 // keeps ringing until it's tapped.
-import { ring } from './bell.js?v=4';
+import { ring } from './bell.js?v=5';
 
 const KEY = 'kitchen:timers';
 const el = document.getElementById('timers');

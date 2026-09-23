@@ -45,42 +45,32 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
 - ❌ A running patty counter on the iPad. Kevin will make sure there's enough.
 - ❌ Brand names/logos. The look is 1950s diner, In-N-Out-*inspired*, but no
   trademarks.
-- ❌ The burger drawing on the kitchen's build cards. Kevin said it won't
-  help; build cards are text, bottom to top.
 - ❌ Neon on a black board. Neon sits straight on the cream background.
+- ❌ **Step-by-step cook mode** (tabs, griddle rounds, smash/flip/pull steps,
+  build cards, a rail column). It was built (commit 41bb21e) and Kevin
+  pulled it: *"too complicated to follow… I don't need to follow directions
+  to a T when I'm on my fifth burger."* **Keep the kitchen to one screen.**
 
-## The kitchen (Kevin is cooking alone)
+## The kitchen (Kevin is cooking alone): ONE screen
 
-Kitchen screen has three tabs: **Prep · Cook · Tickets**, a **timer dock**
-along the bottom, and a ⚙ settings sheet.
+- **Tickets on the rail**, oldest first, each with **Order up!**. Landscape
+  iPad fits 4 across.
+- **Prep list** button in the top bar opens the before-service checklist
+  (`PREP` in `cook.js`); some items have a timer button. Ticks are saved on
+  the iPad. The badge counts what's left.
+- **Timer dock** along the bottom: fries, onion rings, onions, flip the
+  patties, patties done, runny eggs, hard eggs, all under **+ Timer**. A done
+  timer rings until tapped. ⚙ sets the timer lengths (defaults in
+  `DEFAULTS`, cook.js).
 
-- **Prep**: the before-service checklist (`PREP` in `cook.js`), some items
-  with a timer button. Ticks are saved on the iPad.
-- **Cook**: works in **rounds**. The oldest orders that fit on the griddle
-  (default **4 patties**, a double = 2, adjustable in ⚙) become one round.
-  A burger is never split; later singles can fill leftover spots. Steps:
-  **Smash** (griddle map, toast buns, hard eggs go in now) →
-  **Flip** (countdown + which cheese on which patty, runny eggs) →
-  **Pull** (160°F check) → **Build** (one card per burger, bottom to top,
-  tap when built) → **Plate** (sides from the oven, shakes to blend,
-  **Order up!**). An order with burgers still to cook shows "keep these
-  warm". Shake/side-only orders appear under "Ready to plate".
-  The round in progress is saved on the iPad, so a reload resumes it.
-- **Tickets**: the full rail as before, with "Built X of Y".
-- **Timers**: default times in `DEFAULTS` (cook.js), editable in ⚙. A done
-  timer rings until tapped; moving past Flip/Pull clears that step's timer.
-  "+ Timer" starts any preset (e.g. another tray of fries).
-
-**Kitchen rules Kevin gave (don't change without asking):**
+**Kitchen facts Kevin gave:**
 - **Breaker:** the deep fryer and the griddle together trip the breaker. The
   air fryer, Tovala, griddle and slow cooker are one-at-a-time too. So rings
   are all fried during prep and held in the oven, and the fryer goes OFF
   before the griddle goes on. The air fryer isn't used at all.
 - Fries are oven fries. Rings are from the **deep fryer**.
-- **Cheese:** one slice per patty. A double with both cheeses gets Gruyère on
-  one patty and American on the other. A double with one cheese gets it on
-  both patties. "Extra" adds one more slice of that cheese. A single with both
-  cheeses gets both slices. (`pattyCheese()` in cook.js.)
+- **Cheese:** one slice per patty. A double with both cheeses gets one of
+  each. (The ticket just lists the cheeses; Kevin knows the rule.)
 
 ## The look
 
@@ -107,7 +97,7 @@ docs/
   menu.js      the menu + how a burger reads back (shared by both pages)
   fb.js        Firebase connection + the ?event= switch
   bell.js      the new-order ding (Web Audio, no sound file)
-  cook.js      cook-mode logic: rounds, cheese per patty, build order, prep list, timer defaults
+  cook.js      the prep list and timer defaults
   timers.js    the timer dock (saved end times, rings until tapped)
   styles.css   all styling (guest, builder, kitchen, sign)
 ```
@@ -138,15 +128,13 @@ docs/
   "status": "new",
   "createdMs": 1790200000000,
   "createdAt": "<server timestamp>",
-  "readyMs": 1790200600000,
-  "built": ["0-0"]
+  "readyMs": 1790200600000
 }
 ```
 Levels are `none | regular | extra`. `status` goes `new` → `ready` when Kevin
 taps **Order up!** (the kitchen's "Put back" sets it to `new` again).
-`readyMs` only exists once it's been marked done. `built` lists the burgers
-already cooked, as `"<line>-<copy>"` (line index in `burgers`, copy within its
-`qty`), written by the Cook tab's Build step.
+`readyMs` only exists once it's been marked done. (Orders made while cook mode
+was live may also carry a `built` list; nothing reads it now.)
 
 Guest-side details: the order id is created before sending, so re-tapping
 Send after a timeout rewrites the same order instead of making a duplicate.
@@ -176,7 +164,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=4');
+const { connect } = await import('./fb.js?v=5');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -204,3 +192,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 - 2026-09-23: v4: kitchen Cook mode (rounds, griddle map, build cards,
   plating), Prep checklist, timer dock, settings. Kevin cooks alone; the site
   replaces the Pantry app for this lunch.
+- 2026-09-23: v5: cook mode REMOVED at Kevin's request. Kitchen is one screen
+  again: tickets + Prep list button + timer dock + ⚙ timer lengths.
