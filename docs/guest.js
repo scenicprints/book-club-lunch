@@ -1,8 +1,8 @@
-import { EVENT, connect } from './fb.js?v=1';
+import { EVENT, connect } from './fb.js?v=2';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
   houseBurger, burgerSummary, extrasList, itemCount, esc,
-} from './menu.js?v=1';
+} from './menu.js?v=2';
 
 const app = document.getElementById('app');
 
@@ -78,16 +78,17 @@ const summaryHtml = (b) => burgerSummary(b).rows.map((r) => `<p><span class="k">
   ? r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')
   : `<i>${r.none}</i>`}</span></p>`).join('');
 
-const sign = (lede, small = false) => `
+const sign = (small = false) => `
   <header class="sign ${small ? 'small' : ''}">
-    <p class="kicker">Book Club</p>
-    <h1>Lunch</h1>
-    ${lede ? `<p class="lede">${lede}</p>` : ''}
+    <div class="board">
+      <p class="kicker">Book Club</p>
+      <h1 class="neon">Lunch</h1>
+    </div>
   </header>`;
 
 function startView() {
   return `
-    ${sign('Build your burger, pick your sides, and it goes straight to the kitchen.')}
+    ${sign()}
     <form class="card" data-form="start">
       <label for="name">Name for the order</label>
       <input id="name" value="${esc(S.name)}" maxlength="40" autocomplete="given-name" enterkeyhint="go" placeholder="Your name">
@@ -99,7 +100,7 @@ function buildView() {
   const t = S.tray;
   const count = itemCount(t);
   return `
-    ${sign('', true)}
+    ${sign(true)}
     <div class="bar">
       <p>Order for <b>${esc(S.name)}</b> <button class="link" data-a="rename">change</button></p>
       ${S.sent.length ? '<button class="link" data-a="sent">Already ordered</button>' : ''}
@@ -185,7 +186,7 @@ function orderLines(o) {
 function sentView() {
   const orders = [...S.sent].reverse();
   return `
-    ${sign('', true)}
+    ${sign(true)}
     <span class="stamp">Order's in!</span>
     <p class="lede" style="text-align:center;color:var(--muted);margin:10px 0 22px">
       It's on its way to the kitchen, ${esc(S.name)}. Want seconds? Just order again.</p>

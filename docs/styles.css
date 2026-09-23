@@ -14,6 +14,8 @@
   --mint: #A8DCCB;
   --chrome: #C8CDD2;
   --green-check: #EAF3E2;
+  --neon-red: #FF2A45;
+  --neon-mint: #3DFFD0;
   --script: 'Yellowtail', 'Brush Script MT', cursive;
   --caps: 'Oswald', 'Arial Narrow', sans-serif;
   --body: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
@@ -49,26 +51,58 @@ button:disabled { cursor: default; }
 
 .wrap { max-width: 560px; margin: 0 auto; padding: 8px 16px 132px; }
 
+/* Neon: a dark sign board with glowing tubes. Red script, mint caps. */
 .sign { text-align: center; padding: 18px 0 8px; }
+.board {
+  display: inline-block;
+  padding: 14px 34px 20px;
+  background: radial-gradient(ellipse at 50% 40%, #2B2421, #141010 75%);
+  border: 3px solid #3B332E;
+  border-radius: 20px;
+  box-shadow:
+    inset 0 0 24px rgba(0, 0, 0, .7),
+    0 0 40px rgba(255, 50, 70, .22),
+    0 5px 0 var(--ink);
+}
 .sign .kicker {
   display: inline-block;
   font: 600 13px/1 var(--caps);
-  letter-spacing: .28em;
+  letter-spacing: .3em;
   text-transform: uppercase;
-  color: var(--paper);
-  background: var(--ink);
-  padding: 7px 12px 6px 15px;
+  color: #EFFFFA;
+  padding: 6px 10px 5px 14px;
+  border: 2px solid #EFFFFA;
   border-radius: 999px;
+  text-shadow: 0 0 3px #fff, 0 0 8px var(--neon-mint), 0 0 16px var(--neon-mint);
+  box-shadow: 0 0 6px var(--neon-mint), 0 0 14px var(--neon-mint), inset 0 0 6px var(--neon-mint);
+  animation: buzz-mint 11s infinite 2s;
 }
-.sign h1 {
-  margin: 6px 0 0;
-  font: 400 64px/1 var(--script);
-  color: var(--red);
-  text-shadow: 3px 3px 0 var(--yellow);
-  transform: rotate(-4deg);
-}
-.sign .lede { margin: 14px auto 0; max-width: 30ch; color: var(--muted); }
+.sign h1 { margin: 8px 0 0; font: 400 64px/1 var(--script); transform: rotate(-4deg); }
 .sign.small h1 { font-size: 52px; }
+.neon {
+  color: #FFF1F2;
+  text-shadow:
+    0 0 2px #fff,
+    0 0 6px #FF6B7A,
+    0 0 14px var(--neon-red),
+    0 0 28px var(--neon-red),
+    0 0 48px var(--neon-red),
+    0 0 80px #C0142A;
+  animation: ignite 1.6s both, buzz 7s infinite 3s;
+}
+/* switching on: a couple of stutters, then it holds */
+@keyframes ignite {
+  0%, 12% { opacity: .15; text-shadow: none; }
+  14% { opacity: 1; }
+  18% { opacity: .2; text-shadow: none; }
+  24%, 30% { opacity: 1; }
+  33% { opacity: .35; text-shadow: none; }
+  40%, 100% { opacity: 1; }
+}
+/* an old tube that buzzes now and then */
+@keyframes buzz { 0%, 91%, 93.5%, 95%, 100% { opacity: 1; } 92%, 94.5% { opacity: .55; } }
+@keyframes buzz-mint { 0%, 96%, 100% { opacity: 1; } 97% { opacity: .5; } 98% { opacity: .9; } }
+@media (prefers-reduced-motion: reduce) { .neon, .sign .kicker { animation: none; } }
 
 .card {
   background: var(--paper);
@@ -396,18 +430,14 @@ body.kitchen {
   align-items: center;
   gap: 18px;
   padding: 10px 24px 12px;
-  background: linear-gradient(#E9ECEF, #AEB4BA);
-  color: var(--ink);
-  border-bottom: 3px solid #6B7178;
+  background: radial-gradient(ellipse at 10% 50%, #2B2421, #141010 60%);
+  color: #fff;
+  border-bottom: 4px solid;
+  border-image: linear-gradient(#F4F6F8, #8E959C) 1;
 }
-.k-top h1 {
-  margin: 0;
-  font: 400 44px/1 var(--script);
-  color: var(--red);
-  text-shadow: 0 0 1px #fff, 2px 2px 0 rgba(0, 0, 0, .15);
-}
+.k-top h1 { margin: 0 8px 0 4px; font: 400 48px/1.1 var(--script); transform: rotate(-3deg); }
 .k-top .count { font: 600 22px/1 var(--caps); letter-spacing: .08em; text-transform: uppercase; }
-.k-top .flag { margin-left: auto; font: 600 15px/1 var(--caps); letter-spacing: .08em; text-transform: uppercase; background: var(--yellow); padding: 7px 10px 6px; border-radius: 6px; }
+.k-top .flag { margin-left: auto; font: 600 15px/1 var(--caps); letter-spacing: .08em; text-transform: uppercase; background: var(--yellow); color: var(--ink); padding: 7px 10px 6px; border-radius: 6px; }
 .k-top .flag + .flag { margin-left: 0; }
 
 .rail {
@@ -521,7 +551,8 @@ body.kitchen {
 
 .k-start { min-height: 100vh; display: grid; place-content: center; text-align: center; padding: 24px; }
 .k-start .panel { background: var(--cream); color: var(--ink); border: 3px solid var(--ink); border-radius: 22px; padding: 30px 36px; box-shadow: 8px 8px 0 var(--red); max-width: 440px; }
-.k-start h1 { margin: 0; font: 400 72px/1 var(--script); color: var(--red); text-shadow: 3px 3px 0 var(--yellow); }
+.k-start .sign { padding-top: 0; }
+.k-start h1 { font-size: 72px; }
 .k-start p { color: var(--muted); }
 .k-start .fine { font-size: 14px; }
 

@@ -1,6 +1,6 @@
-import { EVENT, connect } from './fb.js?v=1';
-import { unlockBell, ring } from './bell.js?v=1';
-import { burgerSummary, extrasList, esc } from './menu.js?v=1';
+import { EVENT, connect } from './fb.js?v=2';
+import { unlockBell, ring } from './bell.js?v=2';
+import { burgerSummary, extrasList, esc } from './menu.js?v=2';
 
 const app = document.getElementById('app');
 const IS_TEST = EVENT !== 'book-club-lunch-2026-09-26';
@@ -85,8 +85,10 @@ function render() {
   if (!K.started) {
     app.innerHTML = `
       <div class="k-start"><div class="panel">
-        <p class="kicker" style="font:600 13px/1 var(--caps);letter-spacing:.28em;text-transform:uppercase">Book Club Lunch</p>
-        <h1>Kitchen</h1>
+        <div class="sign"><div class="board">
+          <p class="kicker">Book Club Lunch</p>
+          <h1 class="neon">Kitchen</h1>
+        </div></div>
         <p>Every order a guest sends lands here as a ticket.</p>
         <button class="primary" data-start>Open the kitchen</button>
         <p class="fine">Turns on the new-order bell and keeps the screen awake.</p>
@@ -102,7 +104,7 @@ function render() {
 
   app.innerHTML = `
     <header class="k-top">
-      <h1>Kitchen</h1>
+      <h1 class="neon">Kitchen</h1>
       <span class="count">${open.length ? `${open.length} to make` : 'All caught up'}</span>
       ${K.offline ? '<span class="flag">Offline. Waiting for Wi-Fi…</span>' : ''}
       ${IS_TEST ? `<span class="flag">Test: ${esc(EVENT)}</span>` : ''}

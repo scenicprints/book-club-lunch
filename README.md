@@ -131,7 +131,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=1');
+const { connect } = await import('./fb.js?v=2');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -149,3 +149,7 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 ### Status log
 - 2026-09-23: v1 built and deployed: guest menu, burger builder with live
   burger drawing, kitchen ticket rail, printable QR sign.
+- 2026-09-23: v2: neon signs (guest, kitchen, table sign); removed the
+  explanation line from the guest front page (Kevin's call).
+  `kitchen-qr.png` opens the kitchen on the iPad; `book-club-lunch-qr.png`
+  is the guest QR.
