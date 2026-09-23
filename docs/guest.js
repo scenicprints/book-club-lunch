@@ -1,8 +1,8 @@
-import { EVENT, connect } from './fb.js?v=3';
+import { EVENT, connect } from './fb.js?v=4';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
   houseBurger, burgerSummary, extrasList, itemCount, esc,
-} from './menu.js?v=3';
+} from './menu.js?v=4';
 
 const app = document.getElementById('app');
 
