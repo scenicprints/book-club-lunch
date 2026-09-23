@@ -69,9 +69,9 @@ function ticket(o, number) {
             <div class="q">${b.qty}×</div>
             <div>
               <h3>${s.title}</h3>
-              ${s.rows.map((r) => `<p><span>${r.label}</span>${r.items.length
+              ${s.rows.map((r) => `<p><span class="k">${r.label}</span><span>${r.items.length
                 ? r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')
-                : `<i>${r.none}</i>`}</p>`).join('')}
+                : `<i>${r.none}</i>`}</span></p>`).join('')}
             </div>
           </section>`;
       }).join('')}

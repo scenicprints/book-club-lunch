@@ -74,9 +74,9 @@ const stepper = (qty, action, attrs, min = 0, label = '') => `
     <button type="button" data-a="${action}" data-d="1" ${attrs} aria-label="One more ${label}">+</button>
   </div>`;
 
-const summaryHtml = (b) => burgerSummary(b).rows.map((r) => `<p><span>${r.label}</span>${r.items.length
+const summaryHtml = (b) => burgerSummary(b).rows.map((r) => `<p><span class="k">${r.label}</span><span>${r.items.length
   ? r.items.map((i) => esc(i.label) + (i.extra ? ' <b class="x">extra</b>' : '')).join(', ')
-  : `<i>${r.none}</i>`}</p>`).join('');
+  : `<i>${r.none}</i>`}</span></p>`).join('');
 
 const sign = (lede, small = false) => `
   <header class="sign ${small ? 'small' : ''}">

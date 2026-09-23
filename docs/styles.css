@@ -177,10 +177,9 @@ section { margin-top: 26px; }
 .burger .mini { grid-row: span 2; align-self: start; padding-top: 6px; }
 .burger-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .burger-head h3 { margin: 0; font: 700 21px/1.1 var(--caps); text-transform: uppercase; letter-spacing: .04em; }
-.summary p { margin: 3px 0; font-size: 15px; }
-.summary span, .tb p span {
-  display: inline-block;
-  min-width: 74px;
+.summary p { display: grid; grid-template-columns: 78px 1fr; gap: 6px; margin: 4px 0; font-size: 15px; }
+.summary .k, .tb .k {
+  padding-top: 3px;
   color: var(--muted);
   font: 500 12px/1 var(--caps);
   letter-spacing: .1em;
@@ -374,7 +373,7 @@ section { margin-top: 26px; }
 .l.pickles { width: 86%; height: 8px; border-radius: 6px; background: radial-gradient(circle, #9CC45C 35%, #5E8A2C 40%) 0 0 / 16px 8px; border: 2px solid var(--ink); }
 .l.tomato { width: 96%; height: 10px; border-radius: 5px; background: #E0402F; border: 2px solid var(--ink); }
 .l.lettuce { width: 108%; height: 10px; border-radius: 40%; background: radial-gradient(circle at 50% 0, #9BD15A 55%, #6FAE3A 57%) 0 0 / 14px 12px; border: 2px solid var(--ink); }
-.l.sauce { width: 98%; height: 5px; border-radius: 3px; border: 0; }
+.l.sauce { width: 98%; height: 5px; border-radius: 3px; border: 0; margin-top: 1px; }
 .l.sauce.special { background: #F0925C; }
 .l.sauce.ketchup { background: #C8201B; }
 .l.sauce.mayo { background: #FBF7E8; box-shadow: 0 0 0 1px #D9CFB8; }
@@ -436,9 +435,7 @@ body.kitchen {
 .ticket {
   position: relative;
   color: var(--ink);
-  background:
-    repeating-linear-gradient(transparent 0 29px, #BFD7B2 29px 30px) 0 58px / 100% 100% no-repeat,
-    var(--green-check);
+  background: var(--green-check);
   border-radius: 4px 4px 10px 10px;
   box-shadow: 0 10px 22px rgba(0, 0, 0, .45);
   padding: 0 16px 16px;
@@ -490,7 +487,7 @@ body.kitchen {
   font: 700 20px/1 var(--caps);
 }
 .tb h3 { margin: 2px 0 4px; font: 700 24px/1 var(--caps); letter-spacing: .06em; text-transform: uppercase; }
-.tb p { margin: 4px 0; font-size: 17px; font-weight: 600; }
+.tb p { display: grid; grid-template-columns: 86px 1fr; gap: 6px; margin: 5px 0; font-size: 17px; font-weight: 600; }
 .tb p i { font-weight: 400; color: var(--muted); }
 .ticket .extras { list-style: none; margin: 10px 0 0; padding: 0; font-size: 18px; font-weight: 600; }
 .ticket .extras li { padding: 3px 0; }
