@@ -1,7 +1,7 @@
-import { EVENT, connect } from './fb.js?v=8';
-import { unlockBell, ring } from './bell.js?v=8';
-import { CHEESES, burgerSummary, extrasList, esc } from './menu.js?v=8';
-import { REMINDERS } from './cook.js?v=8';
+import { EVENT, connect } from './fb.js?v=9';
+import { unlockBell, ring } from './bell.js?v=9';
+import { CHEESES, burgerSummary, extrasList, esc } from './menu.js?v=9';
+import { REMINDERS } from './cook.js?v=9';
 
 // One screen, no scrolling: patties to cook along the top, tickets across the
 // middle, heat-and-time reminders along the bottom.

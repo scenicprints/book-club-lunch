@@ -75,19 +75,31 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
    fit). Each ticket's **Order up!** is pinned to its bottom. Tickets list
    only what's on the burger. **↶ Put back** in the header undoes the last
    Order up.
-3. **Bottom rail: temps & times.** Reminders only, nothing counts down:
-   Fries 425°F 25 min · Onion rings 375°F 3 min · Patties 400°F 3 min, flip,
-   2 min · Runny egg Medium 3 min · Hard egg Medium 5 min (`REMINDERS`,
-   cook.js). ⚙ edits both fields as free text; clearing both hides one.
+3. **Bottom rail: where, heat & time.** Reminders only, nothing counts
+   down. Numbers come from Kevin's own Pantry recipes (dial numbers are his
+   stove's 0–10), moved to where he actually cooks each thing:
+   fries parboil (pot, boil 9–10 → simmer 3–4, 8–10 min) · fries (oven
+   450°F, 25 min, flip, 15–20 min) · onion rings (fryer 375°F, 3–4 min) ·
+   patties (skillet 7, 3–4 min, flip, 2 min, 160°F) · runny egg (skillet 5,
+   2–3 min) · hard egg (skillet 5, 4 min flipped) · buns (center griddle on
+   the stovetop, medium, 45–60 sec). In `REMINDERS`, cook.js. ⚙ edits both
+   fields as free text; clearing both hides one.
 
-**Kitchen facts Kevin gave:**
-- **Breaker:** the deep fryer and the griddle together trip the breaker. The
-  air fryer, Tovala, griddle and slow cooker are one-at-a-time too. So rings
-  are all fried during prep and held in the oven, and the fryer goes OFF
-  before the griddle goes on. The air fryer isn't used at all.
-- Fries are oven fries. Rings are from the **deep fryer**.
+**Kitchen facts Kevin gave (don't guess past these; check his Pantry data first):**
+- Fries are **fresh-cut russets** (parboiled, then oven). Onion rings are
+  **fresh, beer-battered**, from the **deep fryer**. Nothing is frozen.
+- **The electric griddle is NOT used.** It shares a breaker problem with the
+  deep fryer, and the fryer runs all lunch, so rings are fried as orders
+  come in (no holding them in the 450°F oven). Patties and eggs are cooked
+  in **skillets on the stovetop**. Buns go on the **center griddle built into
+  the stovetop**.
 - **Cheese:** one slice per patty. A double with both cheeses gets one of
-  each. (The ticket just lists the cheeses; Kevin knows the rule.)
+  each. "Extra" is one more slice.
+- Kevin's **Pantry recipes** live in `scenicprints/pantry-data` →
+  `host_hub.json` (the built "Book Club" event) and `pantry.json`. That built
+  event is an OLDER plan (16 guests, outdoor grill, brioche, mayo sauce);
+  the brief matching this site ("Book Club Lunch", `host_brief.json`) is
+  still unbuilt.
 
 ## The look
 
@@ -114,7 +126,7 @@ docs/
   menu.js      the menu + how a burger reads back (shared by both pages)
   fb.js        Firebase connection + the ?event= switch
   bell.js      the new-order ding (Web Audio, no sound file)
-  cook.js      temps & times shown on the bottom rail
+  cook.js      where/heat/time reminders for the bottom rail
   styles.css   all styling (guest, builder, kitchen, sign)
 ```
 
@@ -182,7 +194,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=8');
+const { connect } = await import('./fb.js?v=9');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -220,3 +232,6 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 - 2026-09-23: v8: kitchen is three fixed bands with no page scroll: top patty
   rail (grouped by cheese, "On the griddle ✓"), tickets on a sideways rail,
   bottom temps & times rail.
+- 2026-09-23: v9: bottom rail = where + heat + time from Kevin's Pantry
+  recipes (fresh fries, beer-battered rings in the deep fryer, skillet
+  patties/eggs, buns on the stovetop center griddle). One row of cards.
