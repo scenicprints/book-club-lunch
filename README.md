@@ -75,15 +75,13 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
    fit). Each ticket's **Order up!** is pinned to its bottom. Tickets list
    only what's on the burger. **↶ Put back** in the header undoes the last
    Order up.
-3. **Bottom rail: where, heat & time.** Reminders only, nothing counts
-   down. Numbers come from Kevin's own Pantry recipes (dial numbers are his
-   stove's 0–10), moved to where he actually cooks each thing:
-   fries parboil (pot, boil 9–10 → simmer 3–4, 8–10 min) · fries (oven
-   450°F, 25 min, flip, 15–20 min) · onion rings (fryer 375°F, 3–4 min) ·
-   patties (skillet 7, 3–4 min, flip, 2 min, 160°F) · runny egg (skillet 5,
-   2–3 min) · hard egg (skillet 5, 4 min flipped) · buns (center griddle on
-   the stovetop, medium, 45–60 sec). In `REMINDERS`, cook.js. ⚙ edits both
-   fields as free text; clearing both hides one.
+3. **Bottom rail: heat & time.** A thin dark strip of plain text. Kevin
+   said the card version was "massive", so keep it slim. Heat is °F or his
+   stove's 0–10 dial; no "oven/fryer/skillet" words. Parboil fries 9–10 → 3–4,
+   8–10 min · Fries 450°F 25, flip, 15–20 min · Rings 375°F 3–4 min ·
+   Patties 7 3–4, flip, 2 min, 160°F · Runny egg 5 2–3 min · Hard egg 5
+   4 min, flipped · Buns Med 45–60 sec. Numbers come from his Pantry recipes
+   (`REMINDERS`, cook.js). ⚙ (top bar) edits them; clearing both boxes hides one.
 
 **Kitchen facts Kevin gave (don't guess past these; check his Pantry data first):**
 - Fries are **fresh-cut russets** (parboiled, then oven). Onion rings are
@@ -194,7 +192,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=9');
+const { connect } = await import('./fb.js?v=10');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -235,3 +233,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 - 2026-09-23: v9: bottom rail = where + heat + time from Kevin's Pantry
   recipes (fresh fries, beer-battered rings in the deep fryer, skillet
   patties/eggs, buns on the stovetop center griddle). One row of cards.
+- 2026-09-23: v10: bottom rail slimmed to a thin text strip (heat + time
+  only); ⚙ moved to the top bar. About 62px on iPad, 63px on phone.

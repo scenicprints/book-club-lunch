@@ -1,7 +1,7 @@
-import { EVENT, connect } from './fb.js?v=9';
-import { unlockBell, ring } from './bell.js?v=9';
-import { CHEESES, burgerSummary, extrasList, esc } from './menu.js?v=9';
-import { REMINDERS } from './cook.js?v=9';
+import { EVENT, connect } from './fb.js?v=10';
+import { unlockBell, ring } from './bell.js?v=10';
+import { CHEESES, burgerSummary, extrasList, esc } from './menu.js?v=10';
+import { REMINDERS } from './cook.js?v=10';
 
 // One screen, no scrolling: patties to cook along the top, tickets across the
 // middle, heat-and-time reminders along the bottom.
@@ -165,7 +165,6 @@ function reminderRail() {
       ${items.map((r) => `
         <span class="rem"><span>${esc(r.label)}</span>
           ${r.temp ? `<b class="temp">${esc(r.temp)}</b>` : ''}${r.time ? `<b>${esc(r.time)}</b>` : ''}</span>`).join('')}
-      <button class="gear" data-open="settings" aria-label="Change the reminders">⚙</button>
     </footer>`;
 }
 
@@ -218,6 +217,7 @@ function render() {
       ${K.offline ? '<span class="flag">Offline</span>' : ''}
       ${IS_TEST ? `<span class="flag">Test: ${esc(EVENT)}</span>` : ''}
       ${last ? `<button class="put-back" data-undo="${last.id}">↶ Put back #${number.get(last.id)} ${esc(last.name)}</button>` : ''}
+      <button class="gear" data-open="settings" aria-label="Change the temps and times">⚙</button>
     </header>
     ${K.error ? `<p class="k-error">${esc(K.error)}</p>` : ''}
     ${pattyRail(open)}

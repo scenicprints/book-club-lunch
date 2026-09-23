@@ -669,20 +669,29 @@ body.kitchen.started #app { height: 100%; display: flex; flex-direction: column;
 body.kitchen.started .k-top { padding-top: 6px; padding-bottom: 8px; }
 body.kitchen.started .k-top h1 { font-size: 38px; }
 
-/* reminders as a single row of small cards: what · where/heat · how long */
-.reminders { display: grid; grid-template-columns: repeat(auto-fit, minmax(118px, 1fr)) 42px; align-items: stretch; gap: 6px; padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); }
-.rem { flex-direction: column; align-items: flex-start; justify-content: center; gap: 3px; white-space: normal; border-radius: 10px; padding: 6px 8px; font-size: 11px; letter-spacing: .08em; line-height: 1.1; }
-.rem b { font-size: 14px; line-height: 1.15; letter-spacing: 0; }
-.rem b.temp { color: var(--ink); }
-.reminders .gear { align-self: center; margin: 0; }
-@media (max-width: 700px) {
-  .reminders { grid-template-columns: repeat(auto-fit, minmax(104px, 1fr)); }
-  .rem { font-size: 10px; }
-  .rem b { font-size: 13px; }
+/* reminders: a thin dark strip of plain text — label, heat, time */
+.reminders {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 18px;
+  padding: 7px 12px calc(7px + env(safe-area-inset-bottom));
+  background: #141010;
+  border-top: 2px solid #3B332E;
+  color: var(--chrome);
 }
+.rem { display: inline-flex; align-items: baseline; gap: 6px; background: none; border: 0; border-radius: 0; padding: 0; white-space: nowrap; font: 600 13px/1.3 var(--caps); letter-spacing: .06em; text-transform: uppercase; color: var(--chrome); }
+.rem b { font-size: 16px; letter-spacing: .02em; text-transform: none; color: var(--yellow); }
+.rem b.temp { color: #fff; }
+.reminders .gear { margin-left: auto; width: 34px; height: 34px; font-size: 18px; border-color: #6B7178; color: var(--chrome); }
 @media (max-width: 700px) {
-  .reminders { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); }
-  .rem { padding: 5px 6px; font-size: 9px; }
+  .reminders { gap: 2px 12px; padding: 5px 8px calc(5px + env(safe-area-inset-bottom)); }
+  .rem { font-size: 10px; gap: 4px; }
   .rem b { font-size: 12px; }
-  .reminders .gear { justify-self: center; }
+  .reminders .gear { width: 28px; height: 28px; font-size: 15px; }
 }
+
+/* top bar: count on the left, everything else pushed right; ⚙ lives here */
+.k-top .count { margin-right: auto; }
+.k-top .flag, .k-top .put-back { margin-left: 0; }
+.k-top .gear { flex: none; width: 40px; height: 40px; font-size: 20px; border-color: var(--chrome); color: #fff; }
