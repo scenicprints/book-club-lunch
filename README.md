@@ -98,8 +98,11 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
 - Kevin's **Pantry recipes** live in `scenicprints/pantry-data` →
   `host_hub.json` (the built "Book Club" event) and `pantry.json`. That built
   event is an OLDER plan (16 guests, outdoor grill, brioche, mayo sauce);
-  the brief matching this site ("Book Club Lunch", `host_brief.json`) is
-  still unbuilt.
+  the brief matching this site ("Book Club Lunch", `host_brief.json`) was
+  updated 2026-09-23 to match everything here (stovetop skillet patties and
+  eggs, buns on the stovetop center griddle, fresh-cut oven fries, rings
+  fried to order in the deep fryer, no electric griddle, cheese per patty).
+  Kevin builds it in Pantry's Host Hub to get the prep plan.
 
 ## The look
 
