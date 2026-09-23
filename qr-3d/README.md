@@ -2,7 +2,7 @@
 
 | File | What |
 |---|---|
-| `guests-qr.svg` / `kitchen-qr.svg` | Flat artwork in millimetres (90 × 90 mm with the quiet border). Import into your slicer or Tinkercad and extrude. |
+| `guests-qr.svg` / `kitchen-qr.svg` | **What Kevin uses.** Filled black squares only (no background, no strokes, since slicers and Tinkercad drop strokes and a background would extrude as a solid block). 90 × 90 mm canvas; the code sits inside a 4-square blank border, so make the plate at least 90 mm. |
 | `*-qr-base.stl` | The 90 × 90 × 2 mm plate. Print it in a **light** color. |
 | `*-qr-code.stl` | The dark squares, 1 mm tall, sitting on top of the plate. Print in a **dark** color. Load both files together; they're already lined up. |
 | `*-qr-combined.stl` | Plate + squares as one model, for a filament swap at 2 mm height instead of two colors. |
