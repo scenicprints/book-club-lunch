@@ -44,7 +44,9 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
 - **The tray**: a drawing at the top of the order screen: fries carton and
   onion rings on one side, the burger in the middle, milkshake glass(es) on
   the other side, each dropping in as it's added (×N when more than one).
-  Hidden when the order is empty.
+  Hidden when the order is empty. It's sticky: scrolling down the menu, it
+  pins near the top of the screen; scrolling back up, it settles into its
+  place and goes no higher.
 - **Runny egg** on the burger drawing: yolk oozes down the side.
 - **Your number**: after sending, the guest sees their ticket number big
   ("#4"), the same number as the kitchen ticket, so Kevin can call it out.
@@ -240,7 +242,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=17');
+const { connect } = await import('./fb.js?v=18');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -302,3 +304,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   the lunch starts at #1.
 - 2026-09-23: v17: place in line on the "Order's in!" screen, a Normal People
   fact per order, and phones forget orders that were reset.
+- 2026-09-23: Kevin's 7:31 PM test order deleted from the real event (still starts at #1).
+- 2026-09-23: v18: the guest's tray is sticky while scrolling the menu.

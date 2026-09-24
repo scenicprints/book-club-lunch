@@ -801,6 +801,10 @@ body.kitchen.started .k-top h1 { font-size: 38px; }
 .tray { gap: 6px; padding: 16px 10px 12px; }
 .tray-side { gap: 4px; }
 .tray-burger { width: 80px; }
+/* The tray rides along at the top while the guest scrolls down the menu and
+   settles back into its place on the way up. The cream shadow hides the menu
+   in the gap above it. Under the dock (5) and the builder sheet (10). */
+.tray { position: sticky; top: 8px; z-index: 4; box-shadow: 4px 4px 0 var(--ink), 0 -10px 0 var(--cream); }
 
 /* ---------- sold out, closing time, ageing tickets, scoreboard ---------- */
 

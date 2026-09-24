@@ -1,9 +1,9 @@
-import { EVENT, connect } from './fb.js?v=17';
+import { EVENT, connect } from './fb.js?v=18';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
   houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt, soldOutIn,
-} from './menu.js?v=17';
-import { BOOK, FACTS } from './book.js?v=17';
+} from './menu.js?v=18';
+import { BOOK, FACTS } from './book.js?v=18';
 
 const app = document.getElementById('app');
 
