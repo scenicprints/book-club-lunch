@@ -790,6 +790,13 @@ body.kitchen.started .k-top h1 { font-size: 38px; }
 .your-no span { display: block; font: 600 13px/1 var(--caps); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
 .your-no b { display: block; font: 400 84px/1.05 var(--script); }
 
+/* guest: place in line, and a fact about the book while they wait */
+.in-line { text-align: center; margin: 0 0 4px; font: 600 16px/1.2 var(--caps); letter-spacing: .12em; text-transform: uppercase; color: var(--red-dark); }
+.book-fact { margin: 0 0 18px; padding: 14px 16px 12px; background: var(--paper); border: 2px dashed var(--red); border-radius: 18px; text-align: center; }
+.book-fact span { display: block; font: 600 13px/1 var(--caps); letter-spacing: .2em; text-transform: uppercase; color: var(--muted); }
+.book-fact p { margin: 10px 0 8px; font: 600 17px/1.45 var(--body); }
+.book-fact small { font: 400 24px/1 var(--script); color: var(--red); }
+
 @media (prefers-reduced-motion: reduce) { .l.egg.runny::after { animation: none; } }
 .tray { gap: 6px; padding: 16px 10px 12px; }
 .tray-side { gap: 4px; }

@@ -50,6 +50,14 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
   ("#4"), the same number as the kitchen ticket, so Kevin can call it out.
   Both sides number orders by server time (`placedAt()` in menu.js).
 - The guest's burger summary lists only what's on it (no "No egg" lines).
+- **Place in line**: under "Your number", a live line: "2 orders ahead of you",
+  then "You're next". It counts unserved orders placed before theirs, and
+  disappears once theirs is served (no "ready" alert).
+- **Book fact**: a "While you wait" card on the "Order's in!" screen with one
+  fact about the book (Normal People by Sally Rooney), a new one per order and
+  never repeated on the same phone. The facts are in `book.js`; every one was
+  checked against two independent sources or one primary source, nothing past
+  the opening premise, and no quotes from the novel.
 
 **Decided against (don't add back):**
 - ❌ "Your order is ready" alert on the guest's phone. Kevin dropped it.
@@ -71,6 +79,7 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
   Extra crispy). Built in v15, removed in v16: Special requests is just the typing box.
 - ❌ A prep checklist on the kitchen screen. Kevin preps from the Pantry app
   (its brief is `host_brief.json` in `scenicprints/pantry-data`).
+- ❌ A Wi-Fi QR code on the table sign.
 
 ## The kitchen (Kevin is cooking alone): ONE screen, NO page scrolling
 
@@ -161,6 +170,7 @@ docs/
   fb.js        Firebase connection + the ?event= switch
   bell.js      the new-order ding (Web Audio, no sound file)
   cook.js      where/heat/time reminders for the bottom rail
+  book.js      the book and its facts for the guest's wait
   styles.css   all styling (guest, builder, kitchen, sign)
 ```
 
@@ -200,7 +210,9 @@ taps **Order up!** (the kitchen's "Put back" sets it to `new` again).
 kitchen's **On the griddle ✓** button. (Orders made while cook mode
 was live may also carry a `built` list; nothing reads it now.)
 
-Guest-side details: the order id is created before sending, so re-tapping
+Guest-side details: the page listens to every order for the lunch, which is
+how it numbers the guest's orders and counts who's ahead. Orders deleted from
+Firestore (a reset) disappear from the guest's phone too. The order id is created before sending, so re-tapping
 Send after a timeout rewrites the same order instead of making a duplicate.
 The guest's name and what they've sent are remembered in `localStorage`
 (keyed by event).
@@ -228,7 +240,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=16');
+const { connect } = await import('./fb.js?v=17');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -286,3 +298,7 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   chips. 3D-printable QR SVGs in `qr-3d/`.
 - 2026-09-23: v16: the one-tap burger is "Gott's Roadside Burger" ("Bott's" was a
   typo). Quick-request chips removed; Special requests is just the typing box.
+- 2026-09-23: real event's orders reset (two of Kevin's test orders deleted), so
+  the lunch starts at #1.
+- 2026-09-23: v17: place in line on the "Order's in!" screen, a Normal People
+  fact per order, and phones forget orders that were reset.

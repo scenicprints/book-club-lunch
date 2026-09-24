@@ -1,8 +1,9 @@
-import { EVENT, connect } from './fb.js?v=16';
+import { EVENT, connect } from './fb.js?v=17';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
   houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt, soldOutIn,
-} from './menu.js?v=16';
+} from './menu.js?v=17';
+import { BOOK, FACTS } from './book.js?v=17';
 
 const app = document.getElementById('app');
 
@@ -26,6 +27,7 @@ const S = {
   pendingId: null,
   notice: '',                    // e.g. "Onion rings just sold out, so we took them off…"
   kitchen: { soldOut: {}, closed: false }, // set by the iPad
+  line: new Map(),               // sent order id → unserved orders placed before it
 };
 S.screen = S.name ? 'build' : 'start';
 
@@ -36,20 +38,32 @@ const houseOut = () => ['burgers', 'gruyere', 'onion', 'special'].some((id) => o
 
 const conn = connect();
 
-// Ticket numbers match the kitchen's: the nth order placed for this lunch.
-async function refreshNumbers() {
-  const { fs, orders } = await conn;
-  const all = (await fs.getDocs(orders)).docs
-    .map((d) => ({ id: d.id, at: placedAt(d.data()) }))
-    .sort((a, b) => a.at - b.at);
-  let changed = false;
-  for (const o of S.sent) {
-    const n = all.findIndex((x) => x.id === o.id) + 1;
-    if (o.id && n && n !== o.number) { o.number = n; changed = true; }
-  }
-  if (changed) { store.set(KEY.sent, S.sent); render(); }
+// Every order for this lunch, live. Ticket numbers match the kitchen's (the
+// nth order placed), and each order this phone sent knows how many unserved
+// orders are ahead of it.
+let everyOrder = [];
+function track() {
+  S.line = new Map();
+  everyOrder.forEach((o, n) => {
+    const mine = S.sent.find((x) => x.id === o.id);
+    if (!mine) return;
+    mine.number = n + 1;
+    if (o.status !== 'ready') S.line.set(o.id, everyOrder.slice(0, n).filter((x) => x.status !== 'ready').length);
+  });
+  store.set(KEY.sent, S.sent);
 }
-conn.then(() => S.sent.some((o) => o.id) && refreshNumbers()).catch(() => {});
+conn.then(({ fs, orders }) => fs.onSnapshot(orders, (snap) => {
+  everyOrder = snap.docs.map((d) => ({ id: d.id, ...d.data() })).sort((a, b) => placedAt(a) - placedAt(b));
+  const had = S.sent.length;
+  // Orders wiped from the kitchen (a reset) go from the phone too. A cached
+  // snapshot can be missing orders, so only one from the server counts.
+  if (!snap.metadata.fromCache) S.sent = S.sent.filter((o) => everyOrder.some((x) => x.id === o.id));
+  track();
+  if (!S.sent.length && S.screen === 'sent') S.screen = 'build';
+  // Redrawing mid-typing would drop the cursor, so only the sent screen (or a
+  // reset that changed what this phone has sent) redraws.
+  if (S.screen === 'sent' || S.sent.length !== had) render();
+})).catch(() => {});
 
 // Sold-out switches and closing time come live from the kitchen iPad.
 conn.then(({ fs, state }) => fs.onSnapshot(state, (snap) => {
@@ -257,14 +271,24 @@ function orderLines(o) {
   ];
 }
 
+const inLine = (n) => (n ? `${n} order${n > 1 ? 's' : ''} ahead of you` : "You're next");
+
 function sentView() {
   const orders = [...S.sent].reverse();
+  const latest = orders[0];
   return `
     ${sign(true)}
     <span class="stamp">Order's in!</span>
-    ${orders[0]?.number ? `<div class="your-no"><span>Your number</span><b class="neon">#${orders[0].number}</b></div>` : ''}
+    ${latest?.number ? `<div class="your-no"><span>Your number</span><b class="neon">#${latest.number}</b></div>` : ''}
+    ${latest && S.line.has(latest.id) ? `<p class="in-line">${inLine(S.line.get(latest.id))}</p>` : ''}
     <p class="lede" style="text-align:center;color:var(--muted);margin:10px 0 22px">
       It's on its way to the kitchen, ${esc(S.name)}. Want seconds? Just order again.</p>
+    ${FACTS[latest?.fact] ? `
+      <aside class="book-fact">
+        <span>While you wait</span>
+        <p>${esc(FACTS[latest.fact])}</p>
+        <small>${BOOK.title} · ${BOOK.author}</small>
+      </aside>` : ''}
     ${orders.map((o, n) => `
       <article class="card sent">
         <h3>${o.number ? `Order #${o.number}` : orders.length > 1 ? `Order ${orders.length - n}` : 'Your order'}</h3>
@@ -329,9 +353,13 @@ async function send() {
       new Promise((_, fail) => setTimeout(() => fail(new Error('timeout')), 15000)),
     ]);
     S.pendingId = null;
-    S.sent.push({ id: ref.id, burgers: order.burgers, extras: order.extras, notes: order.notes });
-    store.set(KEY.sent, S.sent);
-    refreshNumbers().catch(() => {});
+    // A fact about the book for the wait, one this phone hasn't shown yet.
+    const seen = new Set(S.sent.map((o) => o.fact));
+    const unseen = FACTS.map((_, n) => n).filter((n) => !seen.has(n));
+    const pool = unseen.length ? unseen : FACTS.map((_, n) => n);
+    const fact = pool[Math.floor(Math.random() * pool.length)];
+    S.sent.push({ id: ref.id, burgers: order.burgers, extras: order.extras, notes: order.notes, fact });
+    track();
     S.tray = emptyTray();
     S.screen = 'sent';
     window.scrollTo(0, 0);
