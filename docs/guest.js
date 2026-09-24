@@ -1,8 +1,8 @@
-import { EVENT, connect } from './fb.js?v=15';
+import { EVENT, connect } from './fb.js?v=16';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
   houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt, soldOutIn,
-} from './menu.js?v=15';
+} from './menu.js?v=16';
 
 const app = document.getElementById('app');
 
@@ -31,11 +31,8 @@ S.screen = S.name ? 'build' : 'start';
 
 const out = () => S.kitchen.soldOut || {};
 const listOf = (a) => (a.length < 2 ? a.join('') : `${a.slice(0, -1).join(', ')} and ${a[a.length - 1]}`);
-// Bott's Roadside Burger can't be made if any of its parts are gone.
+// Gott's Roadside Burger can't be made if any of its parts are gone.
 const houseOut = () => ['burgers', 'gruyere', 'onion', 'special'].some((id) => out()[id]);
-const QUICK = ['Cut in half', 'Sauce on the side', 'Extra crispy'];
-const noteParts = () => S.tray.notes.split(',').map((p) => p.trim()).filter(Boolean);
-const hasNote = (q) => noteParts().some((p) => p.toLowerCase() === q.toLowerCase());
 
 const conn = connect();
 
@@ -186,7 +183,7 @@ function buildView() {
       ${out().burgers ? '<p class="so-note">Burgers are sold out.</p>' : `
         <button class="house" data-a="house" ${houseOut() ? 'disabled' : ''}>
           <span class="plus" aria-hidden="true">+</span>
-          <span><b>Bott's Roadside Burger</b><small>${houseOut() ? 'Sold out'
+          <span><b>Gott's Roadside Burger</b><small>${houseOut() ? 'Sold out'
             : `Single · Gruyère · caramelized onion · special sauce${out().fries ? '' : ', with fries'}`}</small></span>
         </button>
         <button class="add" data-a="new-burger">+ Build your own</button>`}
@@ -205,9 +202,6 @@ function buildView() {
 
     <section>
       <h2 class="menu-head">Special requests</h2>
-      <div class="quick">${QUICK.map((q) => `
-        <button type="button" class="qchip ${hasNote(q) ? 'on' : ''}" data-a="quick" data-q="${q}" aria-pressed="${hasNote(q)}">${q}</button>`).join('')}
-      </div>
       <textarea id="notes" rows="2" maxlength="300" placeholder="Anything else…">${esc(t.notes)}</textarea>
     </section>
 
@@ -372,7 +366,7 @@ app.addEventListener('input', (e) => {
 app.addEventListener('click', (e) => {
   const el = e.target.closest('[data-a]');
   if (!el) return;
-  const { a, i, d, v, id, group, key, q } = el.dataset;
+  const { a, i, d, v, id, group, key } = el.dataset;
   const t = S.tray;
   S.notice = '';
   switch (a) {
@@ -385,11 +379,6 @@ app.addEventListener('click', (e) => {
       t.burgers.push(houseBurger());
       if (!out().fries) t.extras.fries += 1;
       break;
-    case 'quick': {
-      const parts = noteParts();
-      t.notes = (hasNote(q) ? parts.filter((p) => p.toLowerCase() !== q.toLowerCase()) : [...parts, q]).join(', ');
-      break;
-    }
     case 'edit-burger': S.sheet = { index: +i, burger: structuredClone(t.burgers[+i]), fresh: true }; break;
     case 'remove-burger': t.burgers.splice(+i, 1); break;
     case 'burger-qty': t.burgers[+i].qty = clamp(t.burgers[+i].qty + +d, 1, 20); break;

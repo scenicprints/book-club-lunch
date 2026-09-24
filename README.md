@@ -38,7 +38,7 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
 - **Milkshakes**: Vanilla, Oreo (quantity each)
 - **Special requests** free-text box on every order
 - Guests type their **name**; they can **order again** for seconds.
-- **Bott's Roadside Burger** one-tap button (Kevin's name for it): the house burger (single, Gruyère,
+- **Gott's Roadside Burger** one-tap button (Kevin's name for it): the house burger (single, Gruyère,
   caramelized onion, special sauce) **plus fries**. "+ Build your own" opens
   the builder.
 - **The tray**: a drawing at the top of the order screen: fries carton and
@@ -50,8 +50,6 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
   ("#4"), the same number as the kitchen ticket, so Kevin can call it out.
   Both sides number orders by server time (`placedAt()` in menu.js).
 - The guest's burger summary lists only what's on it (no "No egg" lines).
-- **Quick-request chips** above Special requests: Cut in half · Sauce on the
-  side · Extra crispy. Tap to add to the notes, tap again to remove.
 
 **Decided against (don't add back):**
 - ❌ "Your order is ready" alert on the guest's phone. Kevin dropped it.
@@ -69,6 +67,8 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
 - ❌ Crossing burgers off a ticket, and reading orders aloud. Both turned down.
 - ❌ "Same again" reorder button, and a guest-check review screen before sending. Both turned down.
 - ❌ Letter-board menu headers. Mocked up; Kevin prefers the original dashed-line headers.
+- ❌ Quick-request chips above Special requests (Cut in half, Sauce on the side,
+  Extra crispy). Built in v15, removed in v16: Special requests is just the typing box.
 - ❌ A prep checklist on the kitchen screen. Kevin preps from the Pantry app
   (its brief is `host_brief.json` in `scenicprints/pantry-data`).
 
@@ -105,7 +105,7 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
 - **Sold out**: switches for every orderable thing (burgers, each cheese, eggs,
   each topping and sauce, fries, rings, each shake). Guests' phones grey it out
   live; a side already in a guest's tray is taken off with a notice; a burger
-  using a sold-out ingredient can't be sent until it's changed. Bott's Roadside
+  using a sold-out ingredient can't be sent until it's changed. Gott's Roadside
   Burger is disabled if burgers, Gruyère, caramelized onion or special sauce are
   out; if only fries are out, it's added without fries.
 - **Close kitchen** (asks first) / **Reopen**: closed = guests see "Kitchen's
@@ -228,7 +228,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=15');
+const { connect } = await import('./fb.js?v=16');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -279,8 +279,10 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 - 2026-09-23: v13: guest side: The House + fries, tray drawing (fries/rings,
   burger, shakes), oozing runny yolk, big ticket number after sending, empty
   rows hidden. Letter-board menu headers: mockup shown, not built.
-- 2026-09-23: v14: the one-tap burger is named "Bott's Roadside Burger".
+- 2026-09-23: v14: the one-tap burger is named "Gott's Roadside Burger".
   Letter-board headers declined; originals stay.
 - 2026-09-23: v15: sold-out switches, close/reopen the kitchen with the
   end-of-lunch scoreboard, ageing tickets (amber 10 min, red 15), quick-request
   chips. 3D-printable QR SVGs in `qr-3d/`.
+- 2026-09-23: v16: the one-tap burger is "Gott's Roadside Burger" ("Bott's" was a
+  typo). Quick-request chips removed; Special requests is just the typing box.

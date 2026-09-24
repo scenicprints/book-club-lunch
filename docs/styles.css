@@ -795,7 +795,7 @@ body.kitchen.started .k-top h1 { font-size: 38px; }
 .tray-side { gap: 4px; }
 .tray-burger { width: 80px; }
 
-/* ---------- sold out, closing time, ageing tickets, quick requests, scoreboard ---------- */
+/* ---------- sold out, closing time, ageing tickets, scoreboard ---------- */
 
 /* kitchen top-bar buttons */
 .top-btn {
@@ -843,11 +843,6 @@ body.kitchen.started .k-top h1 { font-size: 38px; }
 .house:disabled .plus { background: #BDB3A8; border-color: #BDB3A8; }
 .house:disabled small { color: var(--muted); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
 .notice { margin: 12px 0 0; padding: 10px 14px; border-radius: 12px; background: #FFE9A8; border: 2px solid #D9A400; font-weight: 600; }
-
-/* guest: quick requests */
-.quick { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
-.qchip { border: 2px solid var(--ink); border-radius: 999px; background: var(--paper); padding: 9px 14px 8px; font: 600 15px/1 var(--caps); letter-spacing: .05em; text-transform: uppercase; }
-.qchip.on { background: var(--ink); color: #fff; }
 
 /* guest: closing time */
 .closed-box { margin-top: 26px; text-align: center; }
