@@ -1,10 +1,13 @@
-import { EVENT, connect } from './fb.js?v=20';
-import { unlockBell, ring } from './bell.js?v=20';
-import { CHEESES, EXTRAS, STOCK, burgerSummary, extrasList, esc, placedAt } from './menu.js?v=20';
-import { REMINDERS } from './cook.js?v=20';
+import { EVENT, connect } from './fb.js?v=21';
+import { unlockBell, ring } from './bell.js?v=21';
+import { CHEESES, EXTRAS, STOCK, burgerSummary, extrasList, esc, placedAt } from './menu.js?v=21';
+import { REMINDERS } from './cook.js?v=21';
+import { SECTIONS, STEPS } from './recipe.js?v=21';
 
-// One screen, no scrolling: patties to cook along the top, tickets across the
-// middle, heat-and-time reminders along the bottom.
+// Two screens. Orders: patties to cook along the top, tickets across the
+// middle, heat-and-time reminders along the bottom, no scrolling. Cooking
+// mode: the whole lunch as one recipe, a step at a time, with step timers.
+// Orders keep arriving (and the bell keeps ringing) whichever is showing.
 
 const app = document.getElementById('app');
 const IS_TEST = EVENT !== 'book-club-lunch-2026-09-26';
@@ -13,7 +16,7 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch { /* ignore */ } },
 };
-const KEY = { reminders: 'kitchen:reminders' };
+const KEY = { reminders: 'kitchen:reminders', view: 'kitchen:view', step: `${EVENT}:cookStep`, timers: `${EVENT}:cookTimers` };
 
 const K = {
   started: false,
@@ -26,6 +29,9 @@ const K = {
   reminders: store.get(KEY.reminders, {}), // id -> { temp, time } edits
   sheet: null,      // 'settings' | 'soldout' | 'close'
   kitchen: { soldOut: {}, closed: false }, // shared with every guest's phone
+  view: store.get(KEY.view, 'orders'),       // 'orders' | 'cook'
+  step: Math.min(store.get(KEY.step, 0), STEPS.length - 1),
+  timers: store.get(KEY.timers, {}),         // key -> { label, end, step }
 };
 let fs;
 let ordersRef;
@@ -264,6 +270,66 @@ function scoreboard(all) {
     </div>`;
 }
 
+// ---------- cooking mode ----------
+
+const leftOf = (t) => Math.max(0, Math.ceil((t.end - Date.now()) / 1000));
+const clockOf = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+const saveTimers = () => store.set(KEY.timers, K.timers);
+
+function timerButton(t) {
+  const live = K.timers[t.key];
+  const s = live ? leftOf(live) : t.secs;
+  const state = !live ? 'idle' : s ? 'running' : 'done';
+  return `
+    <button class="ctimer ${state}" data-timer="${t.key}">
+      <span class="ct-label">${esc(t.label)}</span>
+      <b data-left="${t.key}">${state === 'done' ? 'Done!' : clockOf(s)}</b>
+      <span class="ct-act" data-act="${t.key}">${state === 'idle' ? 'Start' : state === 'running' ? 'Stop' : 'Clear'}</span>
+    </button>`;
+}
+
+function cookView(openCount) {
+  const i = K.step;
+  const s = STEPS[i];
+  const running = Object.entries(K.timers);
+  return `
+    <header class="k-top">
+      <h1 class="neon">Cooking</h1>
+      <span class="count">Step ${i + 1} of ${STEPS.length}</span>
+      ${K.offline ? '<span class="flag">Offline</span>' : ''}
+      ${IS_TEST ? `<span class="flag">Test: ${esc(EVENT)}</span>` : ''}
+      <button class="top-btn view-btn" data-view="orders">Orders${openCount ? ` <small>${openCount}</small>` : ''}</button>
+    </header>
+    <div class="cook-progress"><i style="width:${((i + 1) / STEPS.length) * 100}%"></i></div>
+    <div class="cook">
+      <nav class="method" aria-label="Every step">
+        ${SECTIONS.map((sec) => `
+          <h3>${sec}</h3>
+          ${STEPS.map((st, n) => (st.section !== sec ? '' : `
+            <button class="m-step ${n === i ? 'on' : n < i ? 'past' : ''}" data-step="${n}">
+              <span class="m-n">${n + 1}</span><span>${esc(st.title)}</span>
+              ${(st.timers || []).some((t) => K.timers[t.key]) ? '<i class="m-clock" aria-label="timer running">⏱</i>' : ''}
+            </button>`)).join('')}`).join('')}
+      </nav>
+      <section class="step-card">
+        <p class="step-sec">${s.section}</p>
+        <h2>${esc(s.title)}</h2>
+        ${s.items ? `<ul class="needs">${s.items.map((x) => `<li>${esc(x)}</li>`).join('')}</ul>` : ''}
+        <ol class="how">${s.body.map((p) => `<li>${esc(p)}</li>`).join('')}</ol>
+        ${s.timers ? `<div class="step-timers">${s.timers.map(timerButton).join('')}</div>` : ''}
+      </section>
+    </div>
+    <footer class="cook-foot">
+      <div class="cook-rail">${running.map(([key, t]) => {
+        const left = leftOf(t);
+        return `<button class="rail-timer ${left ? '' : 'done'}" data-rail="${key}">
+          <span>${esc(t.label)}</span><b data-left="${key}">${left ? clockOf(left) : 'Done!'}</b></button>`;
+      }).join('')}</div>
+      <button class="nav-btn" data-go="-1" ${i === 0 ? 'disabled' : ''}>Back</button>
+      <button class="nav-btn go" data-go="1" ${i === STEPS.length - 1 ? 'disabled' : ''}>Next</button>
+    </footer>`;
+}
+
 // ---------- page ----------
 
 function render() {
@@ -287,6 +353,13 @@ function render() {
   const open = byTime.filter((o) => o.status !== 'ready');
   const last = byTime.filter((o) => o.status === 'ready').sort((a, b) => (b.readyMs || 0) - (a.readyMs || 0))[0];
   const soldCount = Object.values(K.kitchen.soldOut || {}).filter(Boolean).length;
+  const timerCount = Object.keys(K.timers).length;
+  const timerDone = Object.values(K.timers).some((t) => !leftOf(t));
+  document.body.classList.toggle('cooking', K.view === 'cook');
+  if (K.view === 'cook') {
+    app.innerHTML = cookView(open.length);
+    return;
+  }
 
   app.innerHTML = `
     <header class="k-top">
@@ -296,6 +369,7 @@ function render() {
       ${IS_TEST ? `<span class="flag">Test: ${esc(EVENT)}</span>` : ''}
       ${K.kitchen.closed ? '<span class="flag shut">Closed</span>' : ''}
       ${last ? `<button class="put-back" data-undo="${last.id}">↶ Put back #${number.get(last.id)} ${esc(last.name)}</button>` : ''}
+      <button class="top-btn view-btn ${timerDone ? 'ringing' : ''}" data-view="cook">Cooking mode${timerCount ? ` <small>⏱ ${timerCount}</small>` : ''}</button>
       <button class="top-btn" data-open="soldout">Sold out${soldCount ? ` <small>${soldCount}</small>` : ''}</button>
       ${K.kitchen.closed
         ? '<button class="top-btn" data-reopen>Reopen</button>'
@@ -322,6 +396,28 @@ app.addEventListener('click', (e) => {
     stayAwake();
     K.started = true;
     document.body.classList.add('started');
+  } else if ((el = t('[data-view]'))) {
+    K.view = el.dataset.view;
+    store.set(KEY.view, K.view);
+  } else if ((el = t('[data-step]'))) {
+    K.step = +el.dataset.step;
+    store.set(KEY.step, K.step);
+  } else if ((el = t('[data-go]'))) {
+    K.step = Math.max(0, Math.min(STEPS.length - 1, K.step + +el.dataset.go));
+    store.set(KEY.step, K.step);
+  } else if ((el = t('[data-timer]'))) {
+    const key = el.dataset.timer;
+    const def = STEPS.flatMap((st, n) => (st.timers || []).map((x) => ({ ...x, step: n }))).find((x) => x.key === key);
+    if (K.timers[key]) delete K.timers[key];  // Stop, or Clear once it has rung
+    else K.timers[key] = { label: def.label, end: Date.now() + def.secs * 1000, step: def.step };
+    saveTimers();
+  } else if ((el = t('[data-rail]'))) {
+    const key = el.dataset.rail;
+    const live = K.timers[key];
+    if (live && !leftOf(live)) delete K.timers[key];          // a rung timer: tap to clear
+    else if (live && live.step != null) K.step = live.step;    // a running one: go to its step
+    saveTimers();
+    store.set(KEY.step, K.step);
   } else if ((el = t('[data-open]'))) {
     K.sheet = el.dataset.open;
   } else if ((el = t('[data-so]'))) {
@@ -374,5 +470,24 @@ app.addEventListener('input', (e) => {
   store.set(KEY.reminders, K.reminders);
 });
 
-setInterval(() => { if (K.started && !K.sheet) render(); }, 30000); // keep the "x min" ages fresh
+setInterval(() => { if (K.started && !K.sheet && K.view === 'orders') render(); }, 30000); // keep the "x min" ages fresh
+
+// Cooking timers tick on either screen. Only the numbers change each second;
+// a timer reaching zero redraws once and then rings every few seconds until
+// it is cleared.
+let lastRing = 0;
+const doneBefore = new Set();
+setInterval(() => {
+  if (!K.started) return;
+  let newlyDone = false;
+  for (const [key, t] of Object.entries(K.timers)) {
+    const left = leftOf(t);
+    for (const n of document.querySelectorAll(`[data-left="${key}"]`)) n.textContent = left ? clockOf(left) : 'Done!';
+    if (!left && !doneBefore.has(key)) { doneBefore.add(key); newlyDone = true; }
+    if (left) doneBefore.delete(key);
+  }
+  for (const key of [...doneBefore]) if (!K.timers[key]) doneBefore.delete(key);
+  if (newlyDone && !K.sheet) render();
+  if (doneBefore.size && Date.now() - lastRing > 4000) { ring(); lastRing = Date.now(); }
+}, 500);
 render();

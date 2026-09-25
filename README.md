@@ -112,6 +112,23 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
    Numbers come from his Pantry recipes (`REMINDERS`, cook.js). **⚙ lives in
    the top bar, not on this rail.** It edits these; clearing both boxes hides one.
 
+**Cooking mode (v21): a second, separate kitchen screen.** Kevin asked for
+"the cooking mode in Pantry, centred around this": the whole lunch as one
+recipe (`recipe.js`, 14 steps in 4 sections). Onions first (they cook while
+everything else happens), the special sauce while they soften, then prep
+(fries soak, rings soak, ring station, toppings, beef), fire up (fryer +
+fries), then "every order" cards (patties, buns, eggs, rings, shakes).
+Layout copies Pantry's CookingModeScreen: the method down the left (done
+steps quiet, current marked, tap to jump), the step big on the right,
+Back / Next, a progress bar, step timers that keep counting off-step and
+collect in a rail at the bottom, ringing until tapped. Reached by the
+**Cooking mode** button in the Orders top bar (it shows ⏱ n and pulses red
+when a timer finishes); **Orders** takes you back. Orders and the bell keep
+working on either screen. Step, open timers and which screen is showing
+are kept on the iPad (localStorage), so a reload lands where you were.
+Note: the *Orders* screen stays glanceable, with no step-by-step on it. That
+was tried (v4) and pulled. The guided walk-through lives only here.
+
 **Full screen on the iPad (v19):** `kitchen.html` is a Home Screen web app
 (`kitchen.webmanifest`, `apple-mobile-web-app-capable`, black-translucent
 status bar, `kitchen-icon-*.png` = neon script "K" on a dark tile with a
@@ -179,7 +196,8 @@ docs/
   menu.js      the menu + how a burger reads back (shared by both pages)
   fb.js        Firebase connection + the ?event= switch
   bell.js      the new-order ding (Web Audio, no sound file)
-  cook.js      where/heat/time reminders for the bottom rail
+  cook.js      heat/time reminders for the bottom rail
+  recipe.js    Cooking mode's steps, amounts and timers
   book.js      the book and its facts for the guest's wait
   styles.css   all styling (guest, builder, kitchen, sign)
 ```
@@ -250,7 +268,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=20');
+const { connect } = await import('./fb.js?v=21');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -320,3 +338,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   Kevin is buying Tillamook medium cheddar, no processed American). Fries are
   **waffle cut**: no parboil (cold soak instead); bottom rail = "Waffle fries
   450°F 20–25 min, flip halfway".
+- 2026-09-25: v21: Cooking mode, a separate kitchen screen that walks through
+  the whole lunch, Pantry-style, with step timers.

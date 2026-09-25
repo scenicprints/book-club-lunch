@@ -864,3 +864,62 @@ body.kitchen.started .k-top h1 { font-size: 38px; }
    so the top bar and the start screen keep clear of it. */
 body.kitchen.started .k-top { padding-top: max(6px, env(safe-area-inset-top)); }
 body.kitchen .k-start { padding-top: max(24px, env(safe-area-inset-top)); }
+
+/* ---------- kitchen: cooking mode ---------- */
+/* The method down the left, the step you're on big on the right, timers and
+   Back / Next along the bottom. Type is sized to read across the kitchen. */
+
+.view-btn { border-color: var(--yellow); color: var(--yellow); }
+.view-btn small { background: var(--yellow); color: var(--ink); }
+.view-btn.ringing { background: var(--red); border-color: #fff; color: #fff; animation: pulse .6s infinite alternate; }
+@keyframes pulse { to { transform: scale(1.06); } }
+
+body.kitchen.cooking #app { background: #1c1816; }
+.cook-progress { flex: none; height: 5px; background: #3b332e; }
+.cook-progress i { display: block; height: 100%; background: var(--red); box-shadow: 0 0 10px var(--neon-red); transition: width .25s; }
+
+.cook { flex: 1; min-height: 0; display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 16px; padding: 12px 16px; }
+
+.method { overflow-y: auto; background: rgba(0, 0, 0, .35); border-radius: 16px; padding: 4px 8px 8px; }
+.method h3 { margin: 8px 6px 4px; font: 700 13px/1 var(--caps); letter-spacing: .16em; text-transform: uppercase; color: var(--chrome); }
+.m-step { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; border: 0; border-radius: 10px; background: transparent; color: #fff; padding: 6px 10px; font: 500 15px/1.2 var(--body); }
+.m-step .m-n { flex: none; width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; font: 700 14px/1 var(--caps); background: #3b332e; color: var(--chrome); }
+.m-step.past { color: #8d837b; }
+.m-step.past .m-n { background: #2a2421; color: #8d837b; }
+.m-step.on { background: var(--cream); color: var(--ink); font-weight: 700; }
+.m-step.on .m-n { background: var(--red); color: #fff; }
+.m-clock { margin-left: auto; font-style: normal; }
+
+.step-card { overflow-y: auto; background: var(--cream); color: var(--ink); border: 3px solid var(--ink); border-radius: 22px; box-shadow: 6px 6px 0 var(--red); padding: 22px 28px; }
+.step-sec { margin: 0; font: 700 14px/1 var(--caps); letter-spacing: .18em; text-transform: uppercase; color: var(--red); }
+.step-card h2 { margin: 8px 0 14px; font: 700 40px/1.05 var(--caps); letter-spacing: .02em; text-transform: uppercase; }
+.needs { list-style: none; margin: 0 0 16px; padding: 0; display: flex; flex-wrap: wrap; gap: 8px; }
+.needs li { background: #fff; border: 2px solid var(--ink); border-radius: 10px; padding: 7px 12px; font-weight: 700; font-size: 18px; }
+.how { margin: 0; padding-left: 28px; font-size: 22px; line-height: 1.4; }
+.how li { margin: 0 0 10px; padding-left: 4px; }
+.how li::marker { font: 700 20px var(--caps); color: var(--red); }
+
+.step-timers { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 16px; }
+.ctimer { display: flex; align-items: center; gap: 12px; border: 3px solid var(--ink); border-radius: 999px; background: var(--yellow); padding: 10px 12px 10px 20px; font: 600 18px/1 var(--caps); letter-spacing: .04em; text-transform: uppercase; color: var(--ink); }
+.ctimer b { font-size: 28px; min-width: 3.2ch; }
+.ctimer .ct-act { background: var(--ink); color: #fff; border-radius: 999px; padding: 8px 14px 7px; font-size: 15px; }
+.ctimer.running { background: #fff; }
+.ctimer.done { background: var(--red); color: #fff; border-color: var(--red-dark); animation: pulse .5s infinite alternate; }
+.ctimer.done .ct-act { background: #fff; color: var(--red-dark); }
+
+.cook-foot { flex: none; display: flex; align-items: center; gap: 12px; padding: 10px 16px calc(12px + env(safe-area-inset-bottom)); background: #141010; border-top: 2px solid #3b332e; }
+.cook-rail { flex: 1; min-width: 0; display: flex; gap: 8px; overflow-x: auto; }
+.rail-timer { flex: none; display: flex; align-items: baseline; gap: 8px; border: 2px solid var(--chrome); border-radius: 999px; background: transparent; color: #fff; padding: 8px 14px; font: 600 15px/1 var(--caps); letter-spacing: .04em; text-transform: uppercase; }
+.rail-timer b { font-size: 20px; color: var(--yellow); }
+.rail-timer.done { background: var(--red); border-color: #fff; animation: pulse .5s infinite alternate; }
+.rail-timer.done b { color: #fff; }
+.nav-btn { flex: none; min-width: 130px; border: 2px solid var(--chrome); border-radius: 999px; background: transparent; color: #fff; padding: 15px 22px 14px; font: 700 20px/1 var(--caps); letter-spacing: .08em; text-transform: uppercase; }
+.nav-btn.go { background: var(--red); border-color: var(--ink); box-shadow: 0 4px 0 #000; }
+.nav-btn:disabled { opacity: .35; }
+
+@media (max-width: 900px) {
+  .cook { grid-template-columns: 1fr; }
+  .method { display: none; }
+  .step-card h2 { font-size: 30px; }
+  .how { font-size: 19px; }
+}
