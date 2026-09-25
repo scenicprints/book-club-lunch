@@ -859,3 +859,8 @@ body.kitchen.started .k-top h1 { font-size: 38px; }
 .closed-box { margin-top: 26px; text-align: center; }
 .closed-box h2 { margin: 0; font: 400 58px/1.1 var(--script); }
 .closed-box p { margin: 12px 0 0; font-size: 18px; color: var(--muted); }
+
+/* Kitchen as a Home Screen app: the iPad's status bar floats over the page,
+   so the top bar and the start screen keep clear of it. */
+body.kitchen.started .k-top { padding-top: max(6px, env(safe-area-inset-top)); }
+body.kitchen .k-start { padding-top: max(24px, env(safe-area-inset-top)); }

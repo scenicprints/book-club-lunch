@@ -112,6 +112,14 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
    Numbers come from his Pantry recipes (`REMINDERS`, cook.js). **⚙ lives in
    the top bar, not on this rail.** It edits these; clearing both boxes hides one.
 
+**Full screen on the iPad (v19):** `kitchen.html` is a Home Screen web app
+(`kitchen.webmanifest`, `apple-mobile-web-app-capable`, black-translucent
+status bar, `kitchen-icon-*.png` = neon script "K" on a dark tile with a
+checkerboard strip). Safari → Share → **Add to Home Screen** → open it from
+the icon: no address bar or tabs. The top bar pads for the status bar with
+`env(safe-area-inset-top)`. A Home Screen icon made before v19 has to be
+removed and added again to pick this up.
+
 **Top-bar controls on the iPad** (added v15):
 - **Sold out**: switches for every orderable thing (burgers, each cheese, eggs,
   each topping and sauce, fries, rings, each shake). Guests' phones grey it out
@@ -242,7 +250,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=18');
+const { connect } = await import('./fb.js?v=19');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -306,3 +314,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   fact per order, and phones forget orders that were reset.
 - 2026-09-23: Kevin's 7:31 PM test order deleted from the real event (still starts at #1).
 - 2026-09-23: v18: the guest's tray is sticky while scrolling the menu.
+- 2026-09-24: v19: the kitchen opens full screen from the iPad Home Screen
+  (manifest, Apple web-app tags, neon "K" icon, status-bar padding).
