@@ -1,8 +1,8 @@
-import { EVENT, connect } from './fb.js?v=21';
-import { unlockBell, ring } from './bell.js?v=21';
-import { CHEESES, EXTRAS, STOCK, burgerSummary, extrasList, esc, placedAt } from './menu.js?v=21';
-import { REMINDERS } from './cook.js?v=21';
-import { SECTIONS, STEPS } from './recipe.js?v=21';
+import { EVENT, connect } from './fb.js?v=22';
+import { unlockBell, ring } from './bell.js?v=22';
+import { CHEESES, EXTRAS, STOCK, burgerSummary, extrasList, esc, placedAt } from './menu.js?v=22';
+import { REMINDERS } from './cook.js?v=22';
+import { SECTIONS, STEPS } from './recipe.js?v=22';
 
 // Two screens. Orders: patties to cook along the top, tickets across the
 // middle, heat-and-time reminders along the bottom, no scrolling. Cooking
@@ -258,7 +258,7 @@ function scoreboard(all) {
     [doubles, 'double', 'doubles'],
     [patties, 'patty', 'patties'],
     [eggs, 'fried egg', 'fried eggs'],
-    ...EXTRAS.map((e) => [all.reduce((n, o) => n + (o.extras?.[e.id] || 0), 0), e.label, e.label.endsWith('milkshake') ? `${e.label}s` : e.label]),
+    ...EXTRAS.map((e) => [all.reduce((n, o) => n + (o.extras?.[e.id] || 0), 0), e.label, e.plural || e.label]),
     [guests, 'guest', 'guests'],
   ].filter(([n]) => n > 0);
   return `

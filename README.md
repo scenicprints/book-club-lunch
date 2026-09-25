@@ -35,6 +35,9 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
   - Quantity per burger (a guest can order 2 of the same build)
   - The builder opens on the house burger: single, Gruyère, caramelized onion, special sauce.
 - **Sides**: Fries, Onion rings (quantity each)
+- **Dipping sauces**: Special sauce, Ketchup, Mayo, Mustard (cups, quantity each).
+  A dip follows its sauce's sold-out switch (`stock` in menu.js), so there's one
+  switch per sauce.
 - **Milkshakes**: Vanilla, Oreo (quantity each)
 - **Special requests** free-text box on every order
 - Guests type their **name**; they can **order again** for seconds.
@@ -268,7 +271,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=21');
+const { connect } = await import('./fb.js?v=22');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -340,3 +343,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   450°F 20–25 min, flip halfway".
 - 2026-09-25: v21: Cooking mode, a separate kitchen screen that walks through
   the whole lunch, Pantry-style, with step timers.
+- 2026-09-25: v22: Dipping sauces section on the guest menu (special sauce,
+  ketchup, mayo, mustard); shows on tickets as "2× Special sauce dip".

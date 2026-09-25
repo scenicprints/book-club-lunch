@@ -24,9 +24,18 @@ export const SAUCES = [
 export const EXTRAS = [
   { id: 'fries', label: 'Fries', group: 'Sides' },
   { id: 'rings', label: 'Onion rings', group: 'Sides' },
-  { id: 'vanilla', label: 'Vanilla milkshake', group: 'Milkshakes' },
-  { id: 'oreo', label: 'Oreo milkshake', group: 'Milkshakes' },
+  // A dip is a cup of one of the burger sauces. It follows that sauce's
+  // sold-out switch (`stock`), so there is one switch per sauce, not two.
+  ...SAUCES.map((s) => ({
+    id: `dip-${s.id}`, row: s.label, label: `${s.label} dip`, plural: `${s.label} dips`,
+    group: 'Dipping sauces', stock: s.id,
+  })),
+  { id: 'vanilla', label: 'Vanilla milkshake', plural: 'Vanilla milkshakes', group: 'Milkshakes' },
+  { id: 'oreo', label: 'Oreo milkshake', plural: 'Oreo milkshakes', group: 'Milkshakes' },
 ];
+
+/** The sold-out switch that governs this side, shake or dip. */
+export const stockOf = (e) => e.stock || e.id;
 
 // Everything the kitchen can mark sold out, grouped the way the switches show.
 export const STOCK = [
@@ -35,7 +44,7 @@ export const STOCK = [
   { group: 'Eggs', items: [{ id: 'egg', label: 'Eggs' }] },
   { group: 'Toppings', items: TOPPINGS },
   { group: 'Sauces', items: SAUCES },
-  { group: 'Sides and shakes', items: EXTRAS },
+  { group: 'Sides and shakes', items: EXTRAS.filter((e) => !e.stock) },
 ];
 
 // Names of anything in an order (or a guest's tray) that's sold out.
@@ -49,7 +58,7 @@ export function soldOutIn(order, out = {}) {
     }
     if (out.egg && b.egg && b.egg !== 'none') hit.add('Eggs');
   }
-  for (const e of EXTRAS) if (out[e.id] && order.extras?.[e.id] > 0) hit.add(e.label);
+  for (const e of EXTRAS) if (out[stockOf(e)] && order.extras?.[e.id] > 0) hit.add(e.label);
   return [...hit];
 }
 

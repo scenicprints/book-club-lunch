@@ -1,9 +1,9 @@
-import { EVENT, connect } from './fb.js?v=21';
+import { EVENT, connect } from './fb.js?v=22';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
-  houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt, soldOutIn,
-} from './menu.js?v=21';
-import { BOOK, FACTS } from './book.js?v=21';
+  houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt, soldOutIn, stockOf,
+} from './menu.js?v=22';
+import { BOOK, FACTS } from './book.js?v=22';
 
 const app = document.getElementById('app');
 
@@ -15,7 +15,7 @@ const store = {
 };
 const KEY = { name: `${EVENT}:name`, sent: `${EVENT}:sent` };
 
-const emptyTray = () => ({ burgers: [], extras: { fries: 0, rings: 0, vanilla: 0, oreo: 0 }, notes: '' });
+const emptyTray = () => ({ burgers: [], extras: Object.fromEntries(EXTRAS.map((e) => [e.id, 0])), notes: '' });
 
 const S = {
   name: store.get(KEY.name, ''),
@@ -68,7 +68,7 @@ conn.then(({ fs, orders }) => fs.onSnapshot(orders, (snap) => {
 // Sold-out switches and closing time come live from the kitchen iPad.
 conn.then(({ fs, state }) => fs.onSnapshot(state, (snap) => {
   S.kitchen = { soldOut: {}, closed: false, ...snap.data() };
-  const dropped = EXTRAS.filter((e) => out()[e.id] && S.tray.extras[e.id] > 0);
+  const dropped = EXTRAS.filter((e) => out()[stockOf(e)] && S.tray.extras[e.id] > 0);
   for (const e of dropped) S.tray.extras[e.id] = 0;
   if (dropped.length) {
     S.notice = `${listOf(dropped.map((e) => e.label))} just sold out, so we took that off your order.`;
@@ -203,12 +203,12 @@ function buildView() {
         <button class="add" data-a="new-burger">+ Build your own</button>`}
     </section>
 
-    ${[['Sides', ''], ['Milkshakes', '']].map(([group]) => `
+    ${['Sides', 'Dipping sauces', 'Milkshakes'].map((group) => `
       <section>
         <h2 class="menu-head">${group}</h2>
         <div class="card list">
           ${EXTRAS.filter((e) => e.group === group).map((e) => `
-            <div class="row ${out()[e.id] ? 'soldout' : ''}"><span>${e.label}</span>${out()[e.id]
+            <div class="row ${out()[stockOf(e)] ? 'soldout' : ''}"><span>${e.row || e.label}</span>${out()[stockOf(e)]
               ? '<span class="so-tag">Sold out</span>'
               : stepper(t.extras[e.id], 'extra', `data-id="${e.id}"`, 0, e.label)}</div>`).join('')}
         </div>
