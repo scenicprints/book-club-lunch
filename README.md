@@ -89,9 +89,9 @@ Three bands, top to bottom (Kevin's layout, 2026-09-23):
 
 1. **Top rail: patties to cook.** Every patty on open tickets that isn't on
    the griddle yet, grouped by the cheese that goes on it, with counts:
-   `5× Gruyère · 2× American · 1× American + American · 1× No cheese`.
-   A double with Gruyère + American shows as one Gruyère patty and one
-   American patty. Extra cheese = one more slice on that patty
+   `5× Gruyère · 2× Cheddar · 1× Cheddar + Cheddar · 1× No cheese`.
+   A double with Gruyère + Cheddar shows as one Gruyère patty and one
+   Cheddar patty. Extra cheese = one more slice on that patty
    (`pattyCheese()` in kitchen.js). Why: fries and rings cook constantly,
    but patties are cooked to order in batches. Kevin cooks what the rail
    says, then assembles tickets from that batch while the next batch cooks.
