@@ -397,7 +397,7 @@ section { margin-top: 26px; }
 .l.bun-bottom { width: 96%; height: 20px; border-radius: 6px 6px 18px 18px; background: linear-gradient(#DC9A45, #BA7328); border: 2px solid var(--ink); }
 .l.patty { width: 104%; height: 22px; border-radius: 12px; background: radial-gradient(circle at 30% 40%, #7A4630 10%, transparent 11%) 0 0 / 14px 9px, #5B3222; border: 2px solid var(--ink); }
 .l.cheese { width: 106%; height: 8px; border-radius: 2px; border: 2px solid var(--ink); }
-.l.cheese.american { background: #F7A928; }
+.l.cheese.cheddar { background: #F7A928; }
 .l.cheese.gruyere { background: #F4DE8E; }
 .l.egg { width: 92%; height: 14px; border-radius: 50%; background: radial-gradient(ellipse 18px 8px at 50% 55%, #FFB300 70%, transparent 75%), #FFFDF5; border: 2px solid var(--ink); }
 .l.egg.hard { background: radial-gradient(ellipse 18px 8px at 50% 55%, #FFD45C 70%, transparent 75%), #FFFDF5; }
@@ -624,7 +624,7 @@ body.kitchen.started #app { height: 100%; display: flex; flex-direction: column;
 .pchip em { font-style: normal; font-weight: 800; color: #F4DE8E; }
 .slice { font: 700 17px/1 var(--caps); font-style: normal; letter-spacing: .04em; text-transform: uppercase; border-radius: 6px; padding: 6px 8px 5px; color: var(--ink); }
 .slice.gruyere { background: #F4DE8E; }
-.slice.american { background: #F7A928; }
+.slice.cheddar { background: #F7A928; }
 .slice.plain { background: transparent; color: var(--chrome); padding-left: 4px; }
 .griddle-btn { flex: none; border: 2px solid #fff; border-radius: 999px; background: var(--red); color: #fff; font: 700 18px/1 var(--caps); letter-spacing: .08em; text-transform: uppercase; padding: 14px 18px 13px; box-shadow: 0 3px 0 #000; }
 .griddle-btn:active { transform: translateY(2px); box-shadow: 0 1px 0 #000; }

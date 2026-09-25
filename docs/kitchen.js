@@ -1,7 +1,7 @@
-import { EVENT, connect } from './fb.js?v=19';
-import { unlockBell, ring } from './bell.js?v=19';
-import { CHEESES, EXTRAS, STOCK, burgerSummary, extrasList, esc, placedAt } from './menu.js?v=19';
-import { REMINDERS } from './cook.js?v=19';
+import { EVENT, connect } from './fb.js?v=20';
+import { unlockBell, ring } from './bell.js?v=20';
+import { CHEESES, EXTRAS, STOCK, burgerSummary, extrasList, esc, placedAt } from './menu.js?v=20';
+import { REMINDERS } from './cook.js?v=20';
 
 // One screen, no scrolling: patties to cook along the top, tickets across the
 // middle, heat-and-time reminders along the bottom.
@@ -95,7 +95,7 @@ function pattyCheese(b) {
 
 // Every patty on tickets not yet on the griddle, grouped by the cheese it gets.
 function pattyRail(open) {
-  const groups = new Map(); // "gruyere+american" -> { slices, n }
+  const groups = new Map(); // "gruyere+cheddar" -> { slices, n }
   for (const o of open) {
     if (o.cooking) continue;
     for (const b of o.burgers || []) {

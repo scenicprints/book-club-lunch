@@ -7,7 +7,7 @@ export const EGGS = [['none', 'No egg'], ['runny', 'Runny'], ['hard', 'Hard']];
 
 export const CHEESES = [
   { id: 'gruyere', label: 'Gruyère' },
-  { id: 'american', label: 'American' },
+  { id: 'cheddar', label: 'Cheddar' },
 ];
 export const TOPPINGS = [
   { id: 'onion', label: 'Caramelized onion' },
@@ -59,7 +59,7 @@ export function houseBurger() {
     qty: 1,
     patties: 'single',
     egg: 'none',
-    cheese: { gruyere: 'regular', american: 'none' },
+    cheese: { gruyere: 'regular', cheddar: 'none' },
     toppings: { onion: 'regular', pickles: 'none', tomato: 'none', lettuce: 'none' },
     sauces: { special: 'regular', ketchup: 'none', mayo: 'none', mustard: 'none' },
   };

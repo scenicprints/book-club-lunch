@@ -28,7 +28,7 @@ touches the real lunch's orders (e.g. `kitchen.html?event=test`).
 - **Burger**: thick smashed patty, cooked through. Guests customise it; Kevin
   builds it 100% to the ticket.
   - Patties: **Single / Double**
-  - Cheese: **Gruyère**, **American**, each No / Yes / Extra (both, one, or none)
+  - Cheese: **Gruyère**, **Cheddar**, each No / Yes / Extra (both, one, or none)
   - Fried egg: **No egg / Runny / Hard**
   - Toppings: **Caramelized onion, Pickles, Tomato, Lettuce**, each No / Yes / Extra
   - Sauces: **Special sauce, Ketchup, Mayo, Mustard**, each No / Yes / Extra
@@ -250,7 +250,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=19');
+const { connect } = await import('./fb.js?v=20');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -316,3 +316,7 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
 - 2026-09-23: v18: the guest's tray is sticky while scrolling the menu.
 - 2026-09-24: v19: the kitchen opens full screen from the iPad Home Screen
   (manifest, Apple web-app tags, neon "K" icon, status-bar padding).
+- 2026-09-25: v20: American cheese → **Cheddar** everywhere (id `cheddar`;
+  Kevin is buying Tillamook medium cheddar, no processed American). Fries are
+  **waffle cut**: no parboil (cold soak instead); bottom rail = "Waffle fries
+  450°F 20–25 min, flip halfway".

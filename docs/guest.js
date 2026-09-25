@@ -1,9 +1,9 @@
-import { EVENT, connect } from './fb.js?v=19';
+import { EVENT, connect } from './fb.js?v=20';
 import {
   LEVELS, PATTIES, EGGS, CHEESES, TOPPINGS, SAUCES, EXTRAS,
   houseBurger, burgerSummary, extrasList, itemCount, esc, placedAt, soldOutIn,
-} from './menu.js?v=19';
-import { BOOK, FACTS } from './book.js?v=19';
+} from './menu.js?v=20';
+import { BOOK, FACTS } from './book.js?v=20';
 
 const app = document.getElementById('app');
 
@@ -91,7 +91,7 @@ function layers(b) {
     if (b.toppings[id] !== 'none') out.push([id, id, b.toppings[id]]);
   }
   if (b.egg !== 'none') out.push(['egg', `egg ${b.egg}`]);
-  for (const c of ['american', 'gruyere']) if (b.cheese[c] !== 'none') out.push([`cheese-${c}`, `cheese ${c}`, b.cheese[c]]);
+  for (const c of ['cheddar', 'gruyere']) if (b.cheese[c] !== 'none') out.push([`cheese-${c}`, `cheese ${c}`, b.cheese[c]]);
   out.push(['patty', 'patty']);
   if (b.patties === 'double') out.push(['patty-2', 'patty']);
   out.push(['bun-bottom', 'bun-bottom']);
