@@ -200,7 +200,7 @@ docs/
   fb.js        Firebase connection + the ?event= switch
   bell.js      the new-order ding (Web Audio, no sound file)
   cook.js      heat/time reminders for the bottom rail
-  recipe.js    Cooking mode's steps, amounts and timers
+  recipe.js    Cooking mode's steps, amounts (grams) and timers
   book.js      the book and its facts for the guest's wait
   styles.css   all styling (guest, builder, kitchen, sign)
 ```
@@ -271,7 +271,7 @@ Wake Lock API.
 
 Open `kitchen.html?event=test` in a browser, open the dev console, and run:
 ```js
-const { connect } = await import('./fb.js?v=22');
+const { connect } = await import('./fb.js?v=23');
 const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
@@ -345,3 +345,5 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   the whole lunch, Pantry-style, with step timers.
 - 2026-09-25: v22: Dipping sauces section on the guest menu (special sauce,
   ketchup, mayo, mustard); shows on tickets as "2× Special sauce dip".
+- 2026-09-26: v23: Cooking mode amounts are all grams (spices stay tsp/tbsp),
+  and every step states the grams it uses, not just the ingredient list.
