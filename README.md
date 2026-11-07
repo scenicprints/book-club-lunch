@@ -276,6 +276,42 @@ const { fs, orders } = await connect();
 for (const d of (await fs.getDocs(orders)).docs) await fs.deleteDoc(d.ref);
 ```
 
+## Reception run of show (separate from the lunch)
+
+A second, unrelated one-off page in the same repo: the **wedding reception
+timeline**, at
+https://scenicprints.github.io/book-club-lunch/timeline.html
+
+```
+docs/
+  timeline.html  the page (markup + the live "now" logic, inline)
+  timeline.js    the schedule: EVENT + BLOCKS, and the time helpers
+  timeline.css   its own look (ivory/gold, Cormorant Garamond + Jost)
+```
+
+- **Nothing is shared with the lunch pages.** No Firebase, no `styles.css`,
+  no `menu.js`; it is a static page with its own `?v=1` cache line, so
+  editing it does not mean bumping the lunch's `?v=N`.
+- **The schedule lives in `timeline.js`** (`BLOCKS`). Each block has a 24-hour
+  `at` time and a name; the 6:45 block also carries `steps` (the speeches
+  through to the dance party) and a `runsOn` note, because those run straight
+  into each other with no times of their own.
+- **Each block runs until the next one starts**; the page works the lengths out
+  itself, so moving a time moves the lengths with it. The last block (Cake) has
+  no next one, so no length is shown for it.
+- **The live bar** follows the phone's clock: "Happening now", what's next and
+  how long until it, with a progress bar through the current block. Within
+  three hours of 4:30 it counts down to the start instead. Past blocks go
+  quiet; the current one is outlined.
+- `?now=18:50` freezes the page at that time, to rehearse it or to check the
+  layout. Drop it to follow the real clock.
+- **Print** gives the whole thing flat on paper, with no live highlighting.
+
+The schedule as Kevin gave it: 4:30 cocktail hour · 5:15 bridal party arrives ·
+5:30 hot potato · 5:45 buffet · 6:30 shoe game · 6:45 Raquel/Trevor speech,
+Ada/Kevin speech into the video montage, directly into the first dance, into
+"El Viejo y la Vieja", into the dance party · 8:00 cake.
+
 ## Related
 
 - The dinner brief for Kevin's Pantry app (what the app's chef shops and
@@ -347,3 +383,7 @@ See the **Status log** at the bottom. Add a line whenever you ship something.
   ketchup, mayo, mustard); shows on tickets as "2× Special sauce dip".
 - 2026-09-26: v23: Cooking mode amounts are all grams (spices stay tsp/tbsp),
   and every step states the grams it uses, not just the ingredient list.
+- 2026-11-07: **Reception run of show** added at `timeline.html` — the wedding
+  reception timeline as a live page (current block, what's next, countdown,
+  `?now=` preview, print). Its own files and version; the lunch pages are
+  untouched.

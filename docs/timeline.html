@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#FBF7F0">
+<meta name="robots" content="noindex">
+<title>Reception · Run of show</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500&family=Jost:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="timeline.css?v=1">
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="kicker" id="kicker">Run of show</p>
+    <h1 id="title">Reception</h1>
+    <p class="window" id="window"></p>
+    <div class="rule"></div>
+  </header>
+
+  <section class="nowbar" id="nowbar" aria-live="polite">
+    <p class="label" id="nowLabel">Now</p>
+    <p class="what" id="nowWhat"></p>
+    <p class="next" id="nowNext"></p>
+    <div class="track"><i id="nowTrack"></i></div>
+  </section>
+
+  <p class="preview" id="preview" hidden></p>
+
+  <ol class="blocks" id="blocks"></ol>
+
+  <footer>
+    <button class="print" onclick="print()">Print</button>
+  </footer>
+</div>
+
+<script type="module">
+import { EVENT, BLOCKS, mins, clock, length } from './timeline.js?v=1';
+
+const OPENS = mins(EVENT.opens);
+const CLOSES = mins(EVENT.closes);
+
+// Each block runs until the next one starts; the last runs to EVENT.closes.
+const plan = BLOCKS.map((b, i) => ({
+  ...b,
+  start: mins(b.at),
+  end: i + 1 < BLOCKS.length ? mins(BLOCKS[i + 1].at) : CLOSES,
+  last: i + 1 === BLOCKS.length,
+}));
+
+document.getElementById('title').textContent = EVENT.name;
+document.getElementById('kicker').textContent = EVENT.kicker;
+document.getElementById('window').textContent =
+  `${plan[0].name} at ${clock(plan[0].start)} · ${plan[plan.length - 1].name} at ${clock(plan[plan.length - 1].start)}`;
+
+// ---- the list ----
+
+const list = document.getElementById('blocks');
+const nodes = plan.map((b) => {
+  const li = document.createElement('li');
+  li.className = 'block';
+
+  const when = document.createElement('div');
+  when.className = 'when';
+  // Every block runs until the next one; the last has no next, so no length is shown.
+  when.innerHTML = `<span class="t">${clock(b.start)}</span>` +
+    (b.last ? '' : `<span class="d">${length(b.end - b.start)}</span>`);
+
+  const card = document.createElement('div');
+  card.className = 'card';
+
+  const tag = document.createElement('p');
+  tag.className = 'tag';
+  tag.textContent = 'Happening now';
+  card.append(tag);
+
+  const h2 = document.createElement('h2');
+  h2.textContent = b.name;
+  card.append(h2);
+
+  if (b.runsOn) {
+    const p = document.createElement('p');
+    p.className = 'runson';
+    p.textContent = b.runsOn;
+    card.append(p);
+  }
+
+  if (b.steps) {
+    const ul = document.createElement('ul');
+    ul.className = 'steps';
+    for (const s of b.steps) {
+      const item = document.createElement('li');
+      item.append(document.createTextNode(s.name));
+      if (s.cue) {
+        const cue = document.createElement('span');
+        cue.className = 'cue';
+        cue.textContent = s.cue;
+        item.append(cue);
+      }
+      ul.append(item);
+    }
+    card.append(ul);
+  }
+
+  li.append(when, card);
+  list.append(li);
+  return li;
+});
+
+// ---- what time is it? ----
+
+// ?now=18:50 freezes the page at that time, to rehearse or to check the layout.
+const asked = new URLSearchParams(location.search).get('now');
+const frozen = asked && /^\d{1,2}:\d{2}$/.test(asked) ? mins(asked) : null;
+
+if (frozen !== null) {
+  const p = document.getElementById('preview');
+  p.textContent = `Previewing ${clock(frozen)} — drop ?now= from the address to follow the real clock.`;
+  p.hidden = false;
+}
+
+function nowMins() {
+  if (frozen !== null) return frozen;
+  const d = new Date();
+  return d.getHours() * 60 + d.getMinutes();
+}
+
+const bar = document.getElementById('nowbar');
+const label = document.getElementById('nowLabel');
+const what = document.getElementById('nowWhat');
+const next = document.getElementById('nowNext');
+const track = document.getElementById('nowTrack');
+
+function tick() {
+  const now = nowMins();
+  const live = plan.findIndex((b) => now >= b.start && now < b.end);
+  const running = now >= OPENS && now < CLOSES;
+
+  nodes.forEach((li, i) => {
+    li.classList.toggle('live', running && i === live);
+    li.classList.toggle('past', running && plan[i].end <= now);
+  });
+
+  if (running && live >= 0) {
+    const b = plan[live];
+    const after = plan[live + 1];
+    label.textContent = 'Happening now';
+    what.textContent = b.name;
+    next.innerHTML = after
+      ? `Next: <b>${after.name}</b> at ${clock(after.start)} — in ${length(after.start - now)}`
+      : `Runs to ${clock(b.end)}`;
+    track.style.width = `${Math.round(((now - b.start) / (b.end - b.start)) * 100)}%`;
+    bar.classList.add('on');
+  } else if (now < OPENS && OPENS - now <= 180) {
+    // Within three hours of the start: count down to it.
+    label.textContent = 'Up first';
+    what.textContent = plan[0].name;
+    next.innerHTML = `Starts at ${clock(plan[0].start)} — in <b>${length(OPENS - now)}</b>`;
+    track.style.width = '0%';
+    bar.classList.add('on');
+  } else {
+    bar.classList.remove('on');
+  }
+}
+
+tick();
+setInterval(tick, 10000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) tick(); });
+</script>
+</body>
+</html>
